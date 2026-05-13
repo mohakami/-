@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>اختبار تفاعلي - إنفاذ القانون البحري</title>
+  <style>
+    :root {
+      --navy: #06162d;
+      --navy2: #0b2748;
+      --gold: #d8a93a;
+      --gold2: #f3cf67;
+      --white: #ffffff;
+      --muted: #dbeafe;
+      --green: #22c55e;
+      --red: #ef4444;
+      --card: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.16);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Tahoma, Arial, sans-serif;
+      color: var(--white);
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(216,169,58,0.18), transparent 34%),
+        linear-gradient(135deg, #03101f 0%, var(--navy) 48%, var(--navy2) 100%);
+    }
+
+    .container {
+      width: min(1120px, 94%);
+      margin: auto;
+      padding: 30px 0 46px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: 30px;
+      padding: 34px 28px;
+      border: 1px solid var(--border);
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03)),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='440' viewBox='0 0 900 440'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.08'%3E%3Cpath d='M0 355 Q220 230 450 320 T900 265'/%3E%3Cpath d='M0 285 Q230 180 470 235 T900 195'/%3E%3Ccircle cx='720' cy='105' r='70'/%3E%3Ccircle cx='720' cy='105' r='120'/%3E%3Cpath d='M720 105 L835 70 M720 105 L790 185 M720 105 L645 178'/%3E%3Cpath d='M120 410 Q355 170 650 420'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: cover;
+      box-shadow: 0 25px 70px rgba(0,0,0,0.36);
+    }
+
+    .badge {
+      display: inline-block;
+      color: var(--gold2);
+      border: 1px solid rgba(243,207,103,0.45);
+      background: rgba(216,169,58,0.12);
+      padding: 9px 16px;
+      border-radius: 999px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--gold2);
+      font-size: clamp(30px, 5vw, 48px);
+      line-height: 1.35;
+      text-shadow: 0 8px 30px rgba(0,0,0,0.36);
+    }
+
+    .subtitle {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.9;
+      max-width: 850px;
+    }
+
+    .name-box {
+      margin-top: 24px;
+      max-width: 700px;
+    }
+
+    label.name-label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--gold2);
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    #studentName {
+      width: 100%;
+      padding: 17px 18px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.10);
+      color: white;
+      font-size: 18px;
+      outline: none;
+    }
+
+    #studentName::placeholder { color: rgba(255,255,255,0.58); }
+
+    .section-title {
+      margin: 28px 0 16px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      border-right: 6px solid var(--gold);
+      background: rgba(216,169,58,0.14);
+      color: var(--gold2);
+      font-size: 23px;
+      font-weight: 900;
+      box-shadow: 0 12px 26px rgba(0,0,0,0.18);
+    }
+
+    .question {
+      margin-bottom: 18px;
+      padding: 22px;
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      box-shadow: 0 18px 42px rgba(0,0,0,0.24);
+      backdrop-filter: blur(12px);
+    }
+
+    .q-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 13px;
+      margin-bottom: 16px;
+    }
+
+    .num {
+      min-width: 44px;
+      height: 44px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--gold2), var(--gold));
+      color: #071a33;
+      font-weight: 900;
+      font-size: 18px;
+    }
+
+    .question h3 {
+      margin: 0;
+      color: white;
+      font-size: 20px;
+      line-height: 1.75;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .tf-options { grid-template-columns: repeat(2, 1fr); }
+
+    .option {
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.07);
+      line-height: 1.7;
+      cursor: pointer;
+      transition: 0.22s ease;
+    }
+
+    .option:hover {
+      transform: translateY(-2px);
+      border-color: rgba(243,207,103,0.58);
+      background: rgba(216,169,58,0.15);
+    }
+
+    .option input {
+      accent-color: var(--gold);
+      transform: scale(1.18);
+      flex-shrink: 0;
+    }
+
+    .correct {
+      border-color: rgba(34,197,94,0.85) !important;
+      background: rgba(34,197,94,0.15) !important;
+    }
+
+    .wrong {
+      border-color: rgba(239,68,68,0.85) !important;
+      background: rgba(239,68,68,0.15) !important;
+    }
+
+    .answer {
+      display: none;
+      margin-top: 13px;
+      color: var(--gold2);
+      font-weight: 900;
+      line-height: 1.7;
+    }
+
+    .controls {
+      position: sticky;
+      bottom: 14px;
+      z-index: 10;
+      margin-top: 28px;
+      padding: 14px;
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      background: rgba(3,16,31,0.86);
+      backdrop-filter: blur(16px);
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      box-shadow: 0 18px 45px rgba(0,0,0,0.33);
+    }
+
+    button {
+      border: none;
+      border-radius: 17px;
+      padding: 15px 28px;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: 0.22s ease;
+    }
+
+    button:hover { transform: translateY(-2px); filter: brightness(1.05); }
+
+    .submit {
+      background: linear-gradient(135deg, var(--gold2), var(--gold));
+      color: #06162d;
+    }
+
+    .reset {
+      color: white;
+      border: 1px solid rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.12);
+    }
+
+    .result {
+      display: none;
+      margin-top: 24px;
+      padding: 26px;
+      border-radius: 26px;
+      text-align: center;
+      border: 1px solid rgba(216,169,58,0.55);
+      background: linear-gradient(135deg, rgba(216,169,58,0.18), rgba(255,255,255,0.07));
+      box-shadow: 0 20px 55px rgba(0,0,0,0.32);
+    }
+
+    .result h2 {
+      margin: 0 0 10px;
+      color: var(--gold2);
+      font-size: 30px;
+    }
+
+    .score {
+      margin: 10px 0;
+      font-size: 26px;
+      font-weight: 900;
+    }
+
+    .message {
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 18px;
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      color: rgba(255,255,255,0.62);
+      text-align: center;
+      font-size: 14px;
+    }
+
+    @media (max-width: 830px) {
+      .hero { padding: 26px 18px; }
+      .options, .tf-options { grid-template-columns: 1fr; }
+      .question h3 { font-size: 18px; }
+      button { width: 100%; }
+    }
+
+    @media print {
+      .controls { display: none; }
+      body { background: #06162d; }
+      .question, .hero, .result { break-inside: avoid; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <section class="hero">
+      <div class="badge">⚓ نشاط تفاعلي للتقييم</div>
+      <h1>اختبار إنفاذ القانون البحري</h1>
+      <p class="subtitle">
+        يتكون النشاط من 10 أسئلة: 5 أسئلة اختيار من متعدد و5 أسئلة صح أو خطأ.
+        أدخل الاسم ثم أجب عن الأسئلة، وبعدها اضغط على زر إظهار النتيجة.
+      </p>
+
+      <div class="name-box">
+        <label class="name-label" for="studentName">اسم المتدرب / الطالب</label>
+        <input type="text" id="studentName" placeholder="اكتب الاسم هنا" />
+      </div>
+    </section>
+
+    <form id="quizForm">
+      <div class="section-title">أولاً: اختر الإجابة الصحيحة</div>
+
+      <div class="question" data-question="q1" data-answer="b">
+        <div class="q-header"><div class="num">1</div><h3>ما المقصود بالعقيدة العسكرية البحرية؟</h3></div>
+        <div class="options">
+          <label class="option"><input type="radio" name="q1" value="a"> (أ) قواعد تنظيم الملاحة التجارية داخل الموانئ.</label>
+          <label class="option"><input type="radio" name="q1" value="b"> (ب) مجموعة مبادئ وأساليب لاستخدام القوات العسكرية لتحقيق الأهداف.</label>
+          <label class="option"><input type="radio" name="q1" value="c"> (ج) إجراءات تفتيش السفن الأجنبية فقط.</label>
+        </div>
+        <div class="answer">الإجابة الصحيحة: (ب)</div>
+      </div>
+
+      <div class="question" data-question="q2" data-answer="c">
+        <div class="q-header"><div class="num">2</div><h3>من مستويات الحرب التي تُستخدم فيها العقيدة العسكرية:</h3></div>
+        <div class="options">
+          <label class="option"><input type="radio" name="q2" value="a"> (أ) المحلي والإداري والفني.</label>
+          <label class="option"><input type="radio" name="q2" value="b"> (ب) الأمني والبحري والجمركي.</label>
+          <label class="option"><input type="radio" name="q2" value="c"> (ج) الاستراتيجي والعملياتي والتكتيكي.</label>
+        </div>
+        <div class="answer">الإجابة الصحيحة: (ج)</div>
+      </div>
+
+      <div class="question" data-question="q3" data-answer="a">
+        <div class="q-header"><div class="num">3</div><h3>من المهام الرئيسية لحرس الحدود في المجال البحري:</h3></div>
+        <div class="options">
+          <label class="option"><input type="radio" name="q3" value="a"> (أ) إنفاذ القانون البحري وحماية المياه الإقليمية.</label>
+          <label class="option"><input type="radio" name="q3" value="b"> (ب) إدارة شركات الملاحة التجارية.</label>
+          <label class="option"><input type="radio" name="q3" value="c"> (ج) إصدار وثائق ملكية السفن.</label>
+        </div>
+        <div class="answer">الإجابة الصحيحة: (أ)</div>
+      </div>
+
+      <div class="question" data-question="q4" data-answer="b">
+        <div class="q-header"><div class="num">4</div><h3>اتفاقية SOLAS تختص بـ:</h3></div>
+        <div class="options">
+          <label class="option"><input type="radio" name="q4" value="a"> (أ) منع تلوث البحار بالنفط.</label>
+          <label class="option"><input type="radio" name="q4" value="b"> (ب) سلامة الأرواح في البحار.</label>
+          <label class="option"><input type="radio" name="q4" value="c"> (ج) مكافحة الهجرة غير الشرعية.</label>
+        </div>
+        <div class="answer">الإجابة الصحيحة: (ب)</div>
+      </div>
+
+      <div class="question" data-question="q5" data-answer="c">
+        <div class="q-header"><div class="num">5</div><h3>من الجرائم المنظمة العابرة للحدود:</h3></div>
+        <div class="options">
+          <label class="option"><input type="radio" name="q5" value="a"> (أ) تسجيل السفن التجارية.</label>
+          <label class="option"><input type="radio" name="q5" value="b"> (ب) إجراءات السلامة داخل الميناء.</label>
+          <label class="option"><input type="radio" name="q5" value="c"> (ج) غسل الأموال وتهريب الأسلحة والمخدرات.</label>
+        </div>
+        <div class="answer">الإجابة الصحيحة: (ج)</div>
+      </div>
+
+      <div class="section-title">ثانياً: أسئلة صح أو خطأ</div>
+
+      <div class="question" data-question="q6" data-answer="true">
+        <div class="q-header"><div class="num">6</div><h3>العقيدة العسكرية البحرية تساعد على توحيد المفاهيم والمصطلحات.</h3></div>
+        <div class="options tf-options">
+          <label class="option"><input type="radio" name="q6" value="true"> صح</label>
+          <label class="option"><input type="radio" name="q6" value="false"> خطأ</label>
+        </div>
+        <div class="answer">الإجابة الصحيحة: صح</div>
+      </div>
+
+      <div class="question" data-question="q7" data-answer="false">
+        <div class="q-header"><div class="num">7</div><h3>القانون البحري الخاص يطبق فقط على الدول بصفتها صاحبة سيادة.</h3></div>
+        <div class="options tf-options">
+          <label class="option"><input type="radio" name="q7" value="true"> صح</label>
+          <label class="option"><input type="radio" name="q7" value="false"> خطأ</label>
+        </div>
+        <div class="answer">الإجابة الصحيحة: خطأ</div>
+      </div>
+
+      <div class="question" data-question="q8" data-answer="true">
+        <div class="q-header"><div class="num">8</div><h3>اتفاقية SAR تختص بالبحث والإنقاذ.</h3></div>
+        <div class="options tf-options">
+          <label class="option"><input type="radio" name="q8" value="true"> صح</label>
+          <label class="option"><input type="radio" name="q8" value="false"> خطأ</label>
+        </div>
+        <div class="answer">الإجابة الصحيحة: صح</div>
+      </div>
+
+      <div class="question" data-question="q9" data-answer="false">
+        <div class="q-header"><div class="num">9</div><h3>اتفاقية MARPOL تختص بتدريب البحارة وإصدار الشهادات لهم.</h3></div>
+        <div class="options tf-options">
+          <label class="option"><input type="radio" name="q9" value="true"> صح</label>
+          <label class="option"><input type="radio" name="q9" value="false"> خطأ</label>
+        </div>
+        <div class="answer">الإجابة الصحيحة: خطأ</div>
+      </div>
+
+      <div class="question" data-question="q10" data-answer="true">
+        <div class="q-header"><div class="num">10</div><h3>مدونة سلوك جيبوتي تقوم على التعاون الإقليمي وتبادل المعلومات وبناء القدرات.</h3></div>
+        <div class="options tf-options">
+          <label class="option"><input type="radio" name="q10" value="true"> صح</label>
+          <label class="option"><input type="radio" name="q10" value="false"> خطأ</label>
+        </div>
+        <div class="answer">الإجابة الصحيحة: صح</div>
+      </div>
+    </form>
+
+    <div class="controls">
+      <button class="submit" type="button" onclick="gradeQuiz()">إظهار النتيجة</button>
+      <button class="reset" type="button" onclick="resetQuiz()">إعادة الاختبار</button>
+    </div>
+
+    <section id="result" class="result">
+      <h2 id="resultTitle">النتيجة</h2>
+      <div id="scoreText" class="score"></div>
+      <div id="messageText" class="message"></div>
+    </section>
+
+    <div class="footer-note">تصميم تفاعلي جاهز للاستخدام في المتصفح</div>
+  </main>
+
+  <script>
+    function gradeQuiz() {
+      const nameInput = document.getElementById("studentName");
+      const studentName = nameInput.value.trim();
+
+      if (!studentName) {
+        alert("يرجى إدخال الاسم قبل إظهار النتيجة.");
+        nameInput.focus();
+        return;
+      }
+
+      const questions = document.querySelectorAll(".question");
+      let score = 0;
+      let answered = 0;
+
+      questions.forEach(question => {
+        const qName = question.dataset.question;
+        const correctAnswer = question.dataset.answer;
+        const selected = document.querySelector(`input[name="${qName}"]:checked`);
+        const options = question.querySelectorAll(".option");
+        const answer = question.querySelector(".answer");
+
+        options.forEach(option => option.classList.remove("correct", "wrong"));
+
+        if (selected) {
+          answered++;
+          if (selected.value === correctAnswer) {
+            score++;
+            selected.closest(".option").classList.add("correct");
+          } else {
+            selected.closest(".option").classList.add("wrong");
+            const correctInput = question.querySelector(`input[value="${correctAnswer}"]`);
+            if (correctInput) correctInput.closest(".option").classList.add("correct");
+          }
+        } else {
+          const correctInput = question.querySelector(`input[value="${correctAnswer}"]`);
+          if (correctInput) correctInput.closest(".option").classList.add("correct");
+        }
+
+        answer.style.display = "block";
+      });
+
+      if (answered < questions.length) {
+        alert(`لم تتم الإجابة على جميع الأسئلة. تمت الإجابة على ${answered} من ${questions.length}.`);
+      }
+
+      const percentage = Math.round((score / questions.length) * 100);
+      const result = document.getElementById("result");
+      document.getElementById("resultTitle").textContent = `نتيجة المتدرب: ${studentName}`;
+      document.getElementById("scoreText").textContent = `${score} من ${questions.length} — ${percentage}%`;
+
+      let message = "";
+      if (percentage >= 90) {
+        message = "ممتاز جداً، مستوى متميز في فهم محاور الدرس.";
+      } else if (percentage >= 70) {
+        message = "جيد جداً، لديك فهم واضح مع الحاجة إلى مراجعة بعض النقاط.";
+      } else if (percentage >= 50) {
+        message = "مقبول، يفضل مراجعة المحاور الأساسية مرة أخرى.";
+      } else {
+        message = "تحتاج إلى مراجعة الدرس جيداً ثم إعادة الاختبار.";
+      }
+
+      document.getElementById("messageText").textContent = message;
+      result.style.display = "block";
+      result.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function resetQuiz() {
+      document.getElementById("quizForm").reset();
+      document.getElementById("result").style.display = "none";
+
+      document.querySelectorAll(".option").forEach(option => option.classList.remove("correct", "wrong"));
+      document.querySelectorAll(".answer").forEach(answer => answer.style.display = "none");
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  </script>
+</body>
+</html>
