@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>بوابة تسجيل الدخول والخروج</title>
+  <style>
+    :root{
+      --navy:#07172f;
+      --navy2:#0d2346;
+      --gold:#d6a84f;
+      --cyan:#38c8ff;
+      --white:#ffffff;
+      --muted:#d9e5f2;
+      --danger:#d94b4b;
+      --success:#25b06d;
+      --card:rgba(255,255,255,.08);
+      --border:rgba(255,255,255,.18);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: "Tahoma", "Arial", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(56,200,255,.18), transparent 28%),
+        linear-gradient(135deg, var(--navy), #020712 70%);
+      color:var(--white);
+      min-height:100vh;
+    }
+    .wrap{width:min(1100px,94%);margin:auto;padding:22px 0 45px}
+    header{
+      display:flex;justify-content:space-between;align-items:center;gap:12px;
+      padding:16px 18px;margin-bottom:18px;border:1px solid var(--border);
+      background:rgba(255,255,255,.06);border-radius:22px;box-shadow:0 18px 45px rgba(0,0,0,.25);
+    }
+    .brand h1{margin:0;font-size:clamp(22px,4vw,36px);letter-spacing:.3px}
+    .brand p{margin:7px 0 0;color:var(--muted);font-size:14px}
+    .badge{border:1px solid var(--gold);color:var(--gold);padding:10px 14px;border-radius:999px;font-weight:bold;white-space:nowrap}
+    .tabs{display:flex;gap:10px;margin:16px 0;flex-wrap:wrap}
+    .tab{
+      border:1px solid var(--border);background:var(--card);color:white;
+      padding:12px 18px;border-radius:14px;cursor:pointer;font-weight:bold;
+    }
+    .tab.active{background:linear-gradient(135deg,var(--gold),#9b6a1b);border-color:transparent;color:#081426}
+    .page{display:none}
+    .page.active{display:block}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .card{
+      background:rgba(255,255,255,.075);border:1px solid var(--border);
+      border-radius:26px;padding:22px;box-shadow:0 22px 60px rgba(0,0,0,.25);
+      backdrop-filter: blur(10px);
+    }
+    .main-card{grid-column:span 2}
+    label{display:block;margin-bottom:10px;font-weight:bold;color:var(--muted)}
+    input{
+      width:100%;padding:17px 16px;border-radius:16px;border:1px solid rgba(255,255,255,.25);
+      background:rgba(255,255,255,.95);color:#07172f;font-size:19px;outline:none;
+    }
+    input:focus{box-shadow:0 0 0 4px rgba(56,200,255,.22);border-color:var(--cyan)}
+    .actions{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+    button{
+      border:0;border-radius:16px;padding:15px 16px;font-weight:bold;font-size:16px;
+      cursor:pointer;transition:.2s;box-shadow:0 12px 26px rgba(0,0,0,.18);
+    }
+    button:hover{transform:translateY(-1px)}
+    .btn-in{background:var(--success);color:white}
+    .btn-out{background:var(--danger);color:white}
+    .btn-save{background:var(--gold);color:#081426}
+    .btn-secondary{background:#e8eef6;color:#07172f}
+    .btn-dark{background:#132b52;color:white;border:1px solid var(--border)}
+    .hint{line-height:1.9;color:var(--muted);font-size:15px;margin:14px 0 0}
+    .status{
+      margin-top:15px;padding:14px;border-radius:16px;background:rgba(56,200,255,.12);
+      border:1px solid rgba(56,200,255,.25);display:none;line-height:1.8
+    }
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+    table{width:100%;border-collapse:collapse;overflow:hidden;border-radius:18px;background:white;color:#081426}
+    th,td{padding:14px 12px;border-bottom:1px solid #dfe6ee;text-align:center;font-size:15px}
+    th{background:#0d2346;color:white;font-size:16px}
+    tr:last-child td{border-bottom:0}
+    .empty{padding:28px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:18px}
+    .today-title{margin:0 0 14px;color:var(--gold);font-size:22px}
+    .lock-note{font-size:13px;color:#c9d8e8;line-height:1.8;margin-top:12px}
+    .footer-note{margin-top:12px;color:#b8c8da;font-size:13px;text-align:center}
+    @media(max-width:760px){
+      header{align-items:flex-start;flex-direction:column}
+      .grid{grid-template-columns:1fr}
+      .main-card{grid-column:auto}
+      .actions{grid-template-columns:1fr}
+      th,td{font-size:13px;padding:10px 8px}
+      .toolbar button{width:100%}
+    }
+    @media print{
+      body{background:white;color:#000}
+      header,.tabs,.toolbar,.card.no-print,.footer-note{display:none!important}
+      .wrap{width:100%;padding:0}
+      .page{display:block}
+      .card{box-shadow:none;border:0;padding:0;background:white}
+      table{color:#000}
+      th{background:#eee!important;color:#000!important}
+      .today-title{color:#000}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <h1>بوابة تسجيل الدخول والخروج</h1>
+        <p>إضافة الاسم فقط، والوقت والتاريخ يتم تسجيلهما تلقائياً في البيان.</p>
+      </div>
+      <div class="badge" id="liveClock">--:--</div>
+    </header>
+
+    <div class="tabs">
+      <button class="tab active" onclick="showPage('home')">الشاشة الرئيسية</button>
+      <button class="tab" onclick="showPage('report')">صفحة البيان</button>
+    </div>
+
+    <section id="home" class="page active">
+      <div class="grid">
+        <div class="card main-card no-print">
+          <label for="employeeName">اسم الموظف / المستفيد</label>
+          <input id="employeeName" type="text" placeholder="اكتب الاسم هنا" autocomplete="name" />
+
+          <div class="actions">
+            <button class="btn-in" onclick="selectAction('دخول')">تسجيل دخول</button>
+            <button class="btn-out" onclick="selectAction('خروج')">تسجيل خروج</button>
+            <button class="btn-save" onclick="saveRecord()">حفظ</button>
+          </div>
+
+          <div id="status" class="status"></div>
+
+          <p class="hint">
+            طريقة الاستخدام: اكتب الاسم ثم اختر دخول أو خروج ثم اضغط حفظ.
+            بعد الحفظ ينتقل السجل تلقائياً إلى صفحة البيان مع اليوم والتاريخ والوقت.
+          </p>
+        </div>
+
+        <div class="card">
+          <h2 class="today-title">بيانات اليوم</h2>
+          <p id="todayInfo" class="hint"></p>
+        </div>
+
+        <div class="card">
+          <h2 class="today-title">حماية البيان</h2>
+          <p class="lock-note">
+            صفحة البيان لا تحتوي على حقول تعديل. البيانات محفوظة داخل المتصفح، ويمكن تصديرها أو طباعتها ومشاركتها.
+            للحماية الرسمية الكاملة من التعديل يُفضّل ربطها لاحقاً بقاعدة بيانات أو Google Sheet بصلاحيات عرض فقط.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="report" class="page">
+      <div class="card">
+        <h2 class="today-title">بيان تسجيل الدخول والخروج</h2>
+        <div class="toolbar">
+          <button class="btn-secondary" onclick="print()">طباعة / حفظ PDF</button>
+          <button class="btn-dark" onclick="exportCSV()">تصدير Excel CSV</button>
+          <button class="btn-dark" onclick="shareReport()">مشاركة البيان</button>
+          <button class="btn-secondary" onclick="clearToday()">مسح بيانات اليوم</button>
+        </div>
+        <div id="reportArea"></div>
+      </div>
+    </section>
+
+    <div class="footer-note">تم تصميم الملف ليعمل كصفحة HTML مستقلة قابلة للمشاركة.</div>
+  </div>
+
+  <script>
+    let selectedAction = "";
+    const storageKey = "gate_records_v1";
+
+    function pad(n){ return String(n).padStart(2,'0'); }
+
+    function nowParts(){
+      const d = new Date();
+      const days = ["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+      return {
+        day: days[d.getDay()],
+        date: `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`,
+        time: `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+      };
+    }
+
+    function updateClock(){
+      const n = nowParts();
+      document.getElementById("liveClock").textContent = `${n.day} | ${n.date} | ${n.time}`;
+      document.getElementById("todayInfo").textContent = `اليوم: ${n.day} — التاريخ: ${n.date} — الوقت الحالي: ${n.time}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function showPage(id){
+      document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      event.target.classList.add("active");
+      if(id === "report") renderReport();
+    }
+
+    function selectAction(action){
+      selectedAction = action;
+      const status = document.getElementById("status");
+      status.style.display = "block";
+      status.innerHTML = `تم اختيار: <b>${action}</b> — اضغط زر حفظ لتسجيل الوقت تلقائياً.`;
+    }
+
+    function getRecords(){
+      try { return JSON.parse(localStorage.getItem(storageKey)) || []; }
+      catch(e){ return []; }
+    }
+
+    function setRecords(records){
+      localStorage.setItem(storageKey, JSON.stringify(records));
+    }
+
+    function saveRecord(){
+      const name = document.getElementById("employeeName").value.trim();
+      const status = document.getElementById("status");
+
+      if(!name){
+        status.style.display = "block";
+        status.innerHTML = "يرجى إدخال الاسم أولاً.";
+        return;
+      }
+      if(!selectedAction){
+        status.style.display = "block";
+        status.innerHTML = "يرجى اختيار تسجيل دخول أو تسجيل خروج قبل الحفظ.";
+        return;
+      }
+
+      const n = nowParts();
+      const record = {
+        name,
+        day: n.day,
+        date: n.date,
+        entry: selectedAction === "دخول" ? n.time : "",
+        exit: selectedAction === "خروج" ? n.time : "",
+        savedAt: n.time
+      };
+
+      const records = getRecords();
+      records.push(record);
+      setRecords(records);
+
+      status.style.display = "block";
+      status.innerHTML = `تم الحفظ بنجاح: <b>${name}</b> — ${selectedAction} — ${n.day} ${n.date} الساعة ${n.time}`;
+      document.getElementById("employeeName").value = "";
+      selectedAction = "";
+      renderReport();
+    }
+
+    function renderReport(){
+      const records = getRecords();
+      if(records.length === 0){
+        document.getElementById("reportArea").innerHTML = `<div class="empty">لا توجد بيانات مسجلة حتى الآن.</div>`;
+        return;
+      }
+
+      const grouped = {};
+      records.forEach(r => {
+        const key = `${r.day} - ${r.date}`;
+        if(!grouped[key]) grouped[key] = [];
+        grouped[key].push(r);
+      });
+
+      let html = "";
+      Object.keys(grouped).reverse().forEach(key => {
+        html += `<h3 class="today-title">${key}</h3>`;
+        html += `<table>
+          <thead>
+            <tr>
+              <th>م</th>
+              <th>الاسم</th>
+              <th>الدخول</th>
+              <th>الخروج</th>
+            </tr>
+          </thead>
+          <tbody>`;
+        grouped[key].forEach((r, i) => {
+          html += `<tr>
+            <td>${i+1}</td>
+            <td>${escapeHTML(r.name)}</td>
+            <td>${r.entry || "-"}</td>
+            <td>${r.exit || "-"}</td>
+          </tr>`;
+        });
+        html += `</tbody></table><br>`;
+      });
+
+      document.getElementById("reportArea").innerHTML = html;
+    }
+
+    function escapeHTML(str){
+      return str.replace(/[&<>"']/g, s => ({
+        '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;'
+      }[s]));
+    }
+
+    function exportCSV(){
+      const records = getRecords();
+      if(records.length === 0){ alert("لا توجد بيانات للتصدير."); return; }
+
+      let csv = "\uFEFFاليوم,التاريخ,الاسم,الدخول,الخروج\n";
+      records.forEach(r => {
+        csv += `"${r.day}","${r.date}","${r.name}","${r.entry || ""}","${r.exit || ""}"\n`;
+      });
+
+      const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "بيان_الدخول_والخروج.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    async function shareReport(){
+      const records = getRecords();
+      if(records.length === 0){ alert("لا توجد بيانات للمشاركة."); return; }
+
+      let text = "بيان تسجيل الدخول والخروج\n\n";
+      records.forEach((r, i) => {
+        text += `${i+1}) ${r.day} ${r.date} | الاسم: ${r.name} | الدخول: ${r.entry || "-"} | الخروج: ${r.exit || "-"}\n`;
+      });
+
+      if(navigator.share){
+        try { await navigator.share({title:"بيان تسجيل الدخول والخروج", text}); }
+        catch(e){}
+      } else {
+        navigator.clipboard.writeText(text);
+        alert("تم نسخ البيان، يمكنك لصقه ومشاركته.");
+      }
+    }
+
+    function clearToday(){
+      const n = nowParts();
+      const ok = confirm("هل تريد مسح بيانات اليوم فقط؟");
+      if(!ok) return;
+      const records = getRecords().filter(r => r.date !== n.date);
+      setRecords(records);
+      renderReport();
+    }
+
+    renderReport();
+  </script>
+</body>
+</html>
