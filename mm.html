@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بوابة تسجيل الدخول والخروج</title>
+
+<style>
+body {
+    margin:0;
+    font-family:Tahoma, Arial;
+    background:linear-gradient(135deg,#07172f,#0d2346);
+    color:white;
+    padding:20px;
+}
+
+.container {
+    max-width:1000px;
+    margin:auto;
+}
+
+.card {
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:22px;
+    padding:22px;
+    margin-bottom:20px;
+}
+
+h1,h2 {
+    margin-top:0;
+}
+
+label {
+    display:block;
+    margin-bottom:8px;
+    font-weight:bold;
+}
+
+input {
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:14px;
+    font-size:17px;
+    margin-bottom:15px;
+}
+
+.buttons {
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+}
+
+button {
+    border:none;
+    border-radius:14px;
+    padding:15px;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.in {
+    background:#28a745;
+    color:white;
+}
+
+.out {
+    background:#dc3545;
+    color:white;
+}
+
+.save {
+    background:#d6a84f;
+    color:black;
+}
+
+#status {
+    margin-top:15px;
+    color:#d6f7ff;
+}
+
+table {
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+    color:black;
+}
+
+th, td {
+    border:1px solid #ddd;
+    padding:10px;
+    text-align:center;
+}
+
+th {
+    background:#0d2346;
+    color:white;
+}
+
+.small {
+    font-size:11px;
+    color:#666;
+}
+
+@media(max-width:700px){
+    .buttons {
+        grid-template-columns:1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+
+<h1>بوابة تسجيل الدخول والخروج</h1>
+
+<label>اسم الشخص</label>
+<input type="text" id="name" placeholder="أدخل الاسم">
+
+<label>اسم مدخل البيانات</label>
+<input type="text" id="operator" placeholder="أدخل اسم مدخل البيانات">
+
+<div class="buttons">
+<button class="in" onclick="setAction('دخول')">تسجيل دخول</button>
+<button class="out" onclick="setAction('خروج')">تسجيل خروج</button>
+<button class="save" onclick="saveData()">حفظ</button>
+</div>
+
+<p id="status"></p>
+
+</div>
+
+<div class="card">
+
+<h2>بيان الدخول والخروج</h2>
+
+<table>
+
+<thead>
+<tr>
+<th>#</th>
+<th>اليوم</th>
+<th>التاريخ الهجري</th>
+<th>الاسم</th>
+<th>الدخول</th>
+<th>الخروج</th>
+<th>مدخل البيانات</th>
+</tr>
+</thead>
+
+<tbody id="tableBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<script>
+
+let currentAction = "";
+
+function setAction(action){
+    currentAction = action;
+    document.getElementById("status").innerHTML =
+    "تم اختيار: " + action;
+}
+
+function getHijriDate(){
+    const date = new Date();
+
+    return new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
+        day:'2-digit',
+        month:'2-digit',
+        year:'numeric'
+    }).format(date);
+}
+
+function getDayName(){
+    const date = new Date();
+
+    const days = [
+        "الأحد",
+        "الاثنين",
+        "الثلاثاء",
+        "الأربعاء",
+        "الخميس",
+        "الجمعة",
+        "السبت"
+    ];
+
+    return days[date.getDay()];
+}
+
+function getTime(){
+    const d = new Date();
+
+    return String(d.getHours()).padStart(2,'0')
+    + ":" +
+    String(d.getMinutes()).padStart(2,'0')
+    + ":" +
+    String(d.getSeconds()).padStart(2,'0');
+}
+
+function saveData(){
+
+    const name = document.getElementById("name").value.trim();
+    const operator = document.getElementById("operator").value.trim();
+
+    if(name === ""){
+        alert("يرجى إدخال الاسم");
+        return;
+    }
+
+    if(operator === ""){
+        alert("يرجى إدخال اسم مدخل البيانات");
+        return;
+    }
+
+    if(currentAction === ""){
+        alert("اختر دخول أو خروج");
+        return;
+    }
+
+    const record = {
+        day: getDayName(),
+        hijri: getHijriDate(),
+        name: name,
+        entry: currentAction === "دخول" ? getTime() : "",
+        exit: currentAction === "خروج" ? getTime() : "",
+        operator: operator
+    };
+
+    let records = JSON.parse(localStorage.getItem("records") || "[]");
+
+    records.push(record);
+
+    localStorage.setItem("records", JSON.stringify(records));
+
+    fetch("https://script.google.com/macros/s/AKfycby28W9K793u6GSG-4wKeBl4XDV55gDqhuay8btxIwXF4wLeBc07ki6f6VBqGqaQhOub/exec", {
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+            name:name,
+            action:currentAction,
+            operator:operator
+        })
+    });
+
+    document.getElementById("status").innerHTML =
+    "تم الحفظ بنجاح";
+
+    document.getElementById("name").value = "";
+    document.getElementById("operator").value = "";
+
+    currentAction = "";
+
+    renderTable();
+}
+
+function renderTable(){
+
+    let records = JSON.parse(localStorage.getItem("records") || "[]");
+
+    let html = "";
+
+    records.forEach((r,index)=>{
+
+        html += `
+        <tr>
+            <td>${index+1}</td>
+            <td>${r.day}</td>
+            <td>${r.hijri}</td>
+            <td>${r.name}</td>
+            <td>${r.entry || "-"}</td>
+            <td>${r.exit || "-"}</td>
+            <td>
+                <div class="small">${r.operator}</div>
+            </td>
+        </tr>
+        `;
+    });
+
+    document.getElementById("tableBody").innerHTML = html;
+}
+
+renderTable();
+
+</script>
+
+</body>
+</html>
