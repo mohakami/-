@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بوابة تسجيل الدخول والخروج</title>
+<style>
+body{
+font-family:Tahoma,Arial;
+background:linear-gradient(135deg,#07172f,#0d2346);
+color:#fff;
+margin:0;
+padding:10px;
+}
+.container{max-width:720px;margin:auto;}
+.card{
+background:rgba(255,255,255,.08);
+padding:16px;
+border-radius:20px;
+margin-bottom:16px;
+box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+h1,h2{text-align:center;margin-top:0}
+label{display:block;margin-bottom:6px;font-weight:bold}
+input{
+width:100%;
+padding:14px;
+border:none;
+border-radius:12px;
+margin-bottom:14px;
+font-size:16px;
+box-sizing:border-box;
+}
+.grid2{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+margin-bottom:10px;
+}
+button{
+padding:14px;
+border:none;
+border-radius:12px;
+font-size:15px;
+font-weight:bold;
+cursor:pointer;
+}
+.green{background:#22c55e;color:white}
+.red{background:#ef4444;color:white}
+.gold{background:#d6a84f;color:black;width:100%}
+.blue{background:#38bdf8;color:#07172f;width:100%}
+.gray{background:#e5e7eb;color:#111827;width:100%;margin-top:10px}
+.active{outline:3px solid #fff}
+table{
+width:100%;
+border-collapse:collapse;
+background:#fff;
+color:#000;
+font-size:12px;
+}
+th,td{
+border:1px solid #ddd;
+padding:7px;
+text-align:center;
+}
+th{background:#0d2346;color:#fff}
+.small{font-size:10px;color:#666}
+#status,#loginMsg{margin-top:10px;text-align:center;font-weight:bold}
+.wrap{overflow-x:auto}
+.hidden{display:none}
+.userbar{
+text-align:center;
+background:rgba(255,255,255,.12);
+padding:10px;
+border-radius:14px;
+margin-bottom:12px;
+font-size:14px;
+}
+@media(max-width:600px){
+body{padding:6px}
+h1{font-size:22px}
+h2{font-size:18px}
+table{font-size:10px}
+th,td{padding:6px}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<section id="loginPage" class="card">
+<h1>تسجيل الدخول</h1>
+
+<label>اسم المستخدم</label>
+<input id="loginUser" placeholder="مثال: user1">
+
+<label>كلمة المرور</label>
+<input id="loginPass" type="password" placeholder="أدخل كلمة المرور">
+
+<button class="gold" onclick="login()">دخول</button>
+
+<p id="loginMsg"></p>
+</section>
+
+<section id="mainPage" class="hidden">
+
+<div class="userbar">
+المستخدم الحالي: <b id="currentUserText"></b>
+</div>
+
+<div class="card">
+<h1>بوابة تسجيل الدخول والخروج</h1>
+
+<label>الاسم</label>
+<input id="name" placeholder="أدخل الاسم">
+
+<label>اسم مدخل البيانات</label>
+<input id="operator" placeholder="يُعبأ تلقائياً من المستخدم" readonly>
+
+<label>حالة التفتيش</label>
+
+<div class="grid2">
+<button id="okBtn" class="green" onclick="setInspection('✓ تم التفتيش')">✓ تم التفتيش</button>
+<button id="badBtn" class="red" onclick="setInspection('✗ لم يتم')">✗ لم يتم</button>
+</div>
+
+<div class="grid2">
+<button class="green" onclick="setAction('دخول')">تسجيل دخول</button>
+<button class="red" onclick="setAction('خروج')">تسجيل خروج</button>
+</div>
+
+<button class="gold" onclick="saveData()">حفظ</button>
+<button class="gray" onclick="logout()">تسجيل خروج من النظام</button>
+
+<p id="status"></p>
+</div>
+
+<div class="card">
+<h2>البيانات المسجلة</h2>
+
+<div class="wrap">
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>اليوم</th>
+<th>التاريخ الهجري</th>
+<th>الاسم</th>
+<th>الدخول</th>
+<th>الخروج</th>
+<th>التفتيش</th>
+<th>مدخل البيانات</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
+</div>
+</div>
+
+</section>
+
+</div>
+
+<script>
+const users = {
+"user1":"1234",
+"user2":"1234",
+"user3":"1234",
+"user4":"1234",
+"user5":"1234",
+"user6":"1234",
+"user7":"1234",
+"user8":"1234",
+"user9":"1234",
+"user10":"1234"
+};
+
+let currentAction = "";
+let inspectionStatus = "";
+
+function login(){
+const u = document.getElementById("loginUser").value.trim();
+const p = document.getElementById("loginPass").value.trim();
+
+if(users[u] && users[u] === p){
+localStorage.setItem("loggedUser", u);
+showMain(u);
+} else {
+document.getElementById("loginMsg").innerHTML = "اسم المستخدم أو كلمة المرور غير صحيحة";
+}
+}
+
+function showMain(user){
+document.getElementById("loginPage").classList.add("hidden");
+document.getElementById("mainPage").classList.remove("hidden");
+document.getElementById("currentUserText").innerText = user;
+document.getElementById("operator").value = user;
+renderTable();
+}
+
+function logout(){
+localStorage.removeItem("loggedUser");
+location.reload();
+}
+
+function checkLogin(){
+const user = localStorage.getItem("loggedUser");
+if(user && users[user]){
+showMain(user);
+}
+}
+
+function setAction(action){
+currentAction = action;
+document.getElementById("status").innerHTML = "تم اختيار: " + action;
+}
+
+function setInspection(status){
+inspectionStatus = status;
+document.getElementById("okBtn").classList.remove("active");
+document.getElementById("badBtn").classList.remove("active");
+
+if(status.includes("تم")){
+document.getElementById("okBtn").classList.add("active");
+} else {
+document.getElementById("badBtn").classList.add("active");
+}
+}
+
+function getHijriDate(){
+return new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
+day:'2-digit',
+month:'2-digit',
+year:'numeric'
+}).format(new Date());
+}
+
+function getDay(){
+const days = ["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+return days[new Date().getDay()];
+}
+
+function getTime(){
+const d = new Date();
+return String(d.getHours()).padStart(2,'0') + ":" +
+String(d.getMinutes()).padStart(2,'0') + ":" +
+String(d.getSeconds()).padStart(2,'0');
+}
+
+function saveData(){
+const name = document.getElementById("name").value.trim();
+const operator = document.getElementById("operator").value.trim();
+
+if(!name){
+alert("يرجى إدخال الاسم");
+return;
+}
+
+if(!inspectionStatus){
+alert("اختر حالة التفتيش");
+return;
+}
+
+if(!currentAction){
+alert("اختر دخول أو خروج");
+return;
+}
+
+const record = {
+day:getDay(),
+hijriDate:getHijriDate(),
+name:name,
+entry: currentAction === "دخول" ? getTime() : "",
+exit: currentAction === "خروج" ? getTime() : "",
+inspection:inspectionStatus,
+operator:operator
+};
+
+let records = JSON.parse(localStorage.getItem("records") || "[]");
+records.push(record);
+localStorage.setItem("records", JSON.stringify(records));
+
+fetch("https://script.google.com/macros/s/AKfycbzZXTfCLzp3A26cJsCck8tFSeea4_Jd_oXdCRnpJSEwArCdCQJHD2N2_DIzw0yE2zU3/exec", {
+method:"POST",
+mode:"no-cors",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+hijriDate:record.hijriDate,
+name:record.name,
+action:currentAction,
+inspection:record.inspection,
+operator:record.operator
+})
+});
+
+document.getElementById("status").innerHTML = "تم الحفظ والإرسال إلى Google Sheet";
+
+document.getElementById("name").value = "";
+inspectionStatus = "";
+currentAction = "";
+
+document.getElementById("okBtn").classList.remove("active");
+document.getElementById("badBtn").classList.remove("active");
+
+renderTable();
+}
+
+function renderTable(){
+let records = JSON.parse(localStorage.getItem("records") || "[]");
+let html = "";
+
+records.forEach((r,index)=>{
+html += `
+<tr>
+<td>${index+1}</td>
+<td>${r.day}</td>
+<td>${r.hijriDate}</td>
+<td>${r.name}</td>
+<td>${r.entry || "-"}</td>
+<td>${r.exit || "-"}</td>
+<td>${r.inspection || "-"}</td>
+<td><span class="small">${r.operator}</span></td>
+</tr>`;
+});
+
+document.getElementById("tableBody").innerHTML = html;
+}
+
+checkLogin();
+</script>
+
+</body>
+</html>
