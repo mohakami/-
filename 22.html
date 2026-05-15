@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>صورة بخلفية بيضاء</title>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js"></script>
+  <style>
+    * { box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { margin:0; min-height:100vh; background:linear-gradient(135deg,#06142b,#0b2447); color:white; display:flex; justify-content:center; align-items:center; padding:16px; }
+    .app { width:100%; max-width:430px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); border-radius:24px; padding:18px; box-shadow:0 20px 60px rgba(0,0,0,.35); backdrop-filter:blur(12px); }
+    h1 { font-size:24px; margin:0 0 8px; text-align:center; }
+    p { margin:0 0 16px; font-size:14px; color:#dbeafe; text-align:center; line-height:1.7; }
+    .preview-box { overflow:hidden; border-radius:22px; background:#fff; aspect-ratio:3/4; margin-bottom:14px; border:3px solid rgba(255,255,255,.25); display:flex; align-items:center; justify-content:center; }
+    canvas { width:100%; height:100%; object-fit:contain; display:none; background:white; }
+    .placeholder { color:#64748b; text-align:center; padding:20px; line-height:1.7; font-weight:bold; }
+    .buttons { display:grid; grid-template-columns:1fr; gap:10px; }
+    button,label { border:none; border-radius:16px; padding:15px 12px; font-size:16px; font-weight:bold; cursor:pointer; text-align:center; transition:.2s; }
+    button:active,label:active { transform:scale(.98); }
+    .primary { background:#38bdf8; color:#00111f; }
+    .save { background:#22c55e; color:#02130a; }
+    .save:disabled { background:rgba(255,255,255,.18); color:rgba(255,255,255,.55); cursor:not-allowed; }
+    .status { margin-top:12px; font-size:13px; color:#bfdbfe; text-align:center; min-height:22px; line-height:1.6; }
+    .signature { margin-top:14px; text-align:center; font-size:13px; color:#93c5fd; font-weight:bold; letter-spacing:1px; }
+    .note { margin-top:12px; font-size:12px; color:#cbd5e1; line-height:1.6; text-align:center; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>صورة بخلفية بيضاء</h1>
+    <p>استورد صورة من الألبوم، وسيتم عزل الشخص وإضافة خلفية بيضاء مع فلترة بسيطة للوجه.</p>
+    <div class="preview-box">
+      <div id="placeholder" class="placeholder">لم يتم اختيار صورة بعد</div>
+      <canvas id="canvas"></canvas>
+    </div>
+    <div class="buttons">
+      <label class="primary">استيراد من الألبوم<input id="galleryFile" type="file" accept="image/*" style="display:none"></label>
+      <button id="saveBtn" class="save" disabled>حفظ في الألبوم</button>
+    </div>
+    <div id="status" class="status"></div>
+    <div class="signature">توقيع: أبو روان الحمدي</div>
+    <div class="note">إذا ظهرت الصورة بدون عزل، افتح الملف من Safari أو ارفعه على Replit/Netlify لأن بعض طرق فتح الملفات تمنع مكتبة العزل.</div>
+  </div>
+<script>
+const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d'),statusText=document.getElementById('status'),saveBtn=document.getElementById('saveBtn'),placeholder=document.getElementById('placeholder'),galleryFile=document.getElementById('galleryFile');
+let latestSegmentationMask=null,selfieSegmentation=null,finalBlob=null;
+galleryFile.addEventListener('change',processFilePhoto); saveBtn.addEventListener('click',saveToAlbum);
+function setStatus(t){statusText.textContent=t} function showCanvas(){placeholder.style.display='none';canvas.style.display='block'}
+function fitSize(w,h){const m=1600;if(w>m||h>m){const r=Math.min(m/w,m/h);return[Math.round(w*r),Math.round(h*r)]}return[w,h]}
+function readFileAsDataURL(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)})}
+async function initSegmentation(){if(selfieSegmentation)return true;if(typeof SelfieSegmentation==='undefined')return false;selfieSegmentation=new SelfieSegmentation({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${f}`});selfieSegmentation.setOptions({modelSelection:1,selfieMode:false});selfieSegmentation.onResults(r=>{latestSegmentationMask=r.segmentationMask});return true}
+async function processFilePhoto(event){const file=event.target.files&&event.target.files[0];if(!file){setStatus('لم يتم اختيار صورة.');return}try{setStatus('تم اختيار الصورة... جاري عرضها');saveBtn.disabled=true;finalBlob=null;latestSegmentationMask=null;const dataUrl=await readFileAsDataURL(file);const img=new Image();img.onload=async function(){let[w,h]=fitSize(img.naturalWidth||img.width,img.naturalHeight||img.height);canvas.width=w;canvas.height=h;showCanvas();ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.filter='brightness(1.06) contrast(1.03) saturate(1.05)';ctx.drawImage(img,0,0,w,h);ctx.filter='none';setStatus('ظهرت الصورة... جاري إضافة الخلفية البيضاء');const aiReady=await initSegmentation();if(aiReady){await selfieSegmentation.send({image:img});drawWhiteBackground(img,w,h)}else{finishImage('تم عرض الصورة بفلتر بسيط، لكن مكتبة عزل الخلفية لم تعمل من هذا المتصفح.')}};img.onerror=function(){setStatus('تعذر قراءة الصورة. إذا كانت HEIC جرّب حفظها كـ JPG ثم أعد الاستيراد.')};img.src=dataUrl;galleryFile.value=''}catch(e){console.error(e);setStatus('حدث خطأ أثناء قراءة الصورة. جرّب صورة JPG أو PNG.')}}
+function drawWhiteBackground(source,w,h){ctx.save();ctx.clearRect(0,0,w,h);ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);if(latestSegmentationMask){ctx.drawImage(latestSegmentationMask,0,0,w,h);ctx.globalCompositeOperation='source-in';ctx.filter='brightness(1.08) contrast(1.04) saturate(1.06) blur(0.15px)';ctx.drawImage(source,0,0,w,h);ctx.globalCompositeOperation='destination-over';ctx.filter='none';ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);finishImage('تمت المعالجة بخلفية بيضاء. اضغط حفظ في الألبوم.')}else{ctx.filter='brightness(1.08) contrast(1.04) saturate(1.06)';ctx.drawImage(source,0,0,w,h);ctx.filter='none';finishImage('تمت الفلترة فقط. لم يتم عزل الخلفية من هذا المتصفح.')}ctx.restore()}
+function finishImage(message){canvas.toBlob(blob=>{finalBlob=blob;saveBtn.disabled=false;setStatus(message)},'image/png',1)}
+async function saveToAlbum(){if(!finalBlob){setStatus('استورد صورة أولاً.');return}const fileName='white-background-photo.png';const imageFile=new File([finalBlob],fileName,{type:'image/png'});try{if(navigator.canShare&&navigator.canShare({files:[imageFile]})){await navigator.share({files:[imageFile],title:'صورة بخلفية بيضاء'});setStatus('من نافذة المشاركة اختر: حفظ الصورة.')}else{const url=URL.createObjectURL(finalBlob);const a=document.createElement('a');a.href=url;a.download=fileName;document.body.appendChild(a);a.click();a.remove();setStatus('تم تنزيل الصورة. افتح التنزيلات ثم احفظها في الصور.');setTimeout(()=>URL.revokeObjectURL(url),1500)}}catch(e){console.error(e);setStatus('تم إلغاء الحفظ أو حدث خطأ. حاول مرة أخرى.')}}
+</script>
+</body>
+</html>
