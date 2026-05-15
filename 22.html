@@ -153,61 +153,51 @@
   }
 
   function drawWhiteBackground(source, w, h) {
-    ctx.save();
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = w;
+    tempCanvas.height = h;
+
+    const tempCtx = tempCanvas.getContext('2d');
+
     ctx.clearRect(0, 0, w, h);
+
+    // خلفية بيضاء كاملة
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, w, h);
 
     if (latestSegmentationMask) {
-      // خلفية بيضاء كاملة
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, w, h);
+      // رسم القناع
+      tempCtx.clearRect(0, 0, w, h);
+      tempCtx.drawImage(latestSegmentationMask, 0, 0, w, h);
 
-      // رسم قناع الشخص
-      ctx.drawImage(latestSegmentationMask, 0, 0, w, h);
-      ctx.globalCompositeOperation = 'source-in';
+      // دمج الشخص فقط
+      tempCtx.globalCompositeOperation = 'source-in';
+      tempCtx.filter = 'brightness(1.10) contrast(1.05) saturate(1.08) blur(0.1px)';
+      tempCtx.drawImage(source, 0, 0, w, h);
 
-      // تحسين الصورة والوجه
-      ctx.filter = 'brightness(1.10) contrast(1.05) saturate(1.08) blur(0.10px)';
-      ctx.drawImage(source, 0, 0, w, h);
+      tempCtx.globalCompositeOperation = 'source-over';
+      tempCtx.filter = 'none';
 
-      // إعادة تعيين الدمج
+      // وضع الشخص فوق الخلفية البيضاء
+      ctx.drawImage(tempCanvas, 0, 0, w, h);
+
+      // تعبئة نهائية للخلفية
       ctx.globalCompositeOperation = 'destination-over';
-
-      // إضافة خلفية بيضاء بالكامل
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, w, h);
-
-      // إزالة أي شفافية متبقية
       ctx.globalCompositeOperation = 'source-over';
-      ctx.filter = 'none';
-
-      // تعبئة نهائية بيضاء لضمان إزالة الخلفية الأصلية نهائياً
-      const imgData = ctx.getImageData(0, 0, w, h);
-      const data = imgData.data;
-
-      for (let i = 0; i < data.length; i += 4) {
-        const alpha = data[i + 3];
-
-        // أي جزء شبه شفاف يتحول لأبيض كامل
-        if (alpha < 255) {
-          data[i] = 255;
-          data[i + 1] = 255;
-          data[i + 2] = 255;
-          data[i + 3] = 255;
-        }
-      }
-
-      ctx.putImageData(imgData, 0, 0);
 
       finishImage('تمت إضافة خلفية بيضاء بالكامل. اضغط حفظ في الألبوم.');
+
     } else {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, h);
       ctx.filter = 'brightness(1.08) contrast(1.04) saturate(1.06)';
       ctx.drawImage(source, 0, 0, w, h);
       ctx.filter = 'none';
-      finishImage('تمت الفلترة فقط. لم يتم عزل الخلفية من هذا المتصفح.');
+
+      finishImage('لم يعمل عزل الخلفية من هذا المتصفح.');
     }
-    ctx.restore();
   }
 
   function finishImage(message) {
