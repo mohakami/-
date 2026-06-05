@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>توزيع القوة البشرية</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Tahoma, Arial, sans-serif;
+  background:#0b1f3a;
+  padding:10px;
+}
+.container{
+  max-width:1150px;
+  margin:auto;
+  background:white;
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+header{
+  background:#07172b;
+  color:white;
+  text-align:center;
+  padding:20px 10px;
+}
+h1{margin:0;font-size:24px}
+.target-box{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:12px;
+  padding:15px;
+  background:#eef3f8;
+  font-weight:bold;
+  flex-wrap:wrap;
+}
+.target-box input{
+  width:150px;
+  font-size:22px;
+  font-weight:bold;
+}
+.table-wrap{
+  overflow-x:auto;
+  padding:12px;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:850px;
+  text-align:center;
+}
+th{
+  background:#0b1f3a;
+  color:white;
+  padding:12px;
+  font-size:15px;
+}
+td{
+  border:1px solid #d6dde6;
+  padding:8px;
+}
+input{
+  width:100%;
+  padding:10px;
+  border:1px solid #cbd5e1;
+  border-radius:9px;
+  text-align:center;
+  font-size:16px;
+}
+.section-input{
+  min-width:170px;
+  font-weight:bold;
+}
+.total-cell{
+  font-size:18px;
+  font-weight:bold;
+  background:#f8fafc;
+}
+.result{
+  margin:0 12px 12px;
+  border-radius:14px;
+  padding:18px;
+  text-align:center;
+  color:white;
+  font-size:22px;
+  font-weight:bold;
+}
+.green{background:#138a36}
+.red{background:#c62828}
+.actions{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  padding:0 12px 16px;
+  flex-wrap:wrap;
+}
+button{
+  border:0;
+  border-radius:12px;
+  padding:12px 18px;
+  background:#123d6b;
+  color:white;
+  font-weight:bold;
+  font-size:15px;
+}
+button.gray{background:#4b5563}
+@media(max-width:700px){
+  body{padding:5px}
+  h1{font-size:20px}
+  .result{font-size:17px}
+}
+@media print{
+  body{background:white;padding:0}
+  .container{box-shadow:none;border-radius:0}
+  .actions{display:none}
+  input{border:0}
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <header>
+    <h1>توزيع القوة البشرية على الأقسام</h1>
+  </header>
+
+  <div class="target-box">
+    <span>المجموع المطلوب:</span>
+    <input id="targetTotal" type="number" min="0" value="100" oninput="updateTarget(this.value)">
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>م</th>
+          <th>اسم القسم</th>
+          <th>الموجود</th>
+          <th>الرخصة</th>
+          <th>الإجازة</th>
+          <th>المستشفى</th>
+          <th>مجموع القسم</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div id="resultBox" class="result red">المجموع الحالي: 0 / المطلوب: 100</div>
+
+  <div class="actions">
+    <button onclick="saveData()">حفظ البيانات</button>
+    <button class="gray" onclick="resetData()">مسح البيانات</button>
+    <button onclick="window.print()">طباعة / حفظ PDF</button>
+  </div>
+</div>
+
+<script>
+const defaultData = {
+  targetTotal: 100,
+  rows: [
+    {name:"", present:0, license:0, leave:0, hospital:0},
+    {name:"", present:0, license:0, leave:0, hospital:0},
+    {name:"", present:0, license:0, leave:0, hospital:0},
+    {name:"", present:0, license:0, leave:0, hospital:0},
+    {name:"", present:0, license:0, leave:0, hospital:0}
+  ]
+};
+
+let data = JSON.parse(localStorage.getItem("manpowerTable5Sections") || "null") || JSON.parse(JSON.stringify(defaultData));
+
+function num(v){ return Number(v) || 0; }
+
+function render(){
+  document.getElementById("targetTotal").value = data.targetTotal;
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+
+  data.rows.forEach((r, i)=>{
+    const sectionTotal = num(r.present) + num(r.license) + num(r.leave) + num(r.hospital);
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td>
+        <input class="section-input" type="text" placeholder="اكتب اسم القسم" value="${r.name}" oninput="updateRow(${i}, 'name', this.value)">
+      </td>
+      <td>
+        <input type="number" min="0" value="${r.present}" oninput="updateRow(${i}, 'present', this.value)">
+      </td>
+      <td>
+        <input type="number" min="0" value="${r.license}" oninput="updateRow(${i}, 'license', this.value)">
+      </td>
+      <td>
+        <input type="number" min="0" value="${r.leave}" oninput="updateRow(${i}, 'leave', this.value)">
+      </td>
+      <td>
+        <input type="number" min="0" value="${r.hospital}" oninput="updateRow(${i}, 'hospital', this.value)">
+      </td>
+      <td class="total-cell">${sectionTotal}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  calculateGrandTotal();
+}
+
+function updateTarget(value){
+  data.targetTotal = num(value);
+  calculateGrandTotal();
+}
+
+function updateRow(index, field, value){
+  data.rows[index][field] = field === "name" ? value : num(value);
+  render();
+}
+
+function calculateGrandTotal(){
+  let grandTotal = 0;
+
+  data.rows.forEach(r=>{
+    grandTotal += num(r.present) + num(r.license) + num(r.leave) + num(r.hospital);
+  });
+
+  const target = num(data.targetTotal);
+  const resultBox = document.getElementById("resultBox");
+
+  resultBox.className = "result " + (grandTotal === target ? "green" : "red");
+
+  if(grandTotal === target){
+    resultBox.textContent = `المجموع الحالي: ${grandTotal} / المطلوب: ${target} — صحيح`;
+  }else if(grandTotal > target){
+    resultBox.textContent = `المجموع الحالي: ${grandTotal} / المطلوب: ${target} — زيادة ${grandTotal - target}`;
+  }else{
+    resultBox.textContent = `المجموع الحالي: ${grandTotal} / المطلوب: ${target} — نقص ${target - grandTotal}`;
+  }
+}
+
+function saveData(){
+  localStorage.setItem("manpowerTable5Sections", JSON.stringify(data));
+  alert("تم حفظ البيانات");
+}
+
+function resetData(){
+  if(confirm("هل تريد مسح جميع البيانات؟")){
+    data = JSON.parse(JSON.stringify(defaultData));
+    localStorage.removeItem("manpowerTable5Sections");
+    render();
+  }
+}
+
+render();
+</script>
+</body>
+</html>
