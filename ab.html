@@ -1,309 +1,399 @@
-<!DOCTYPE html>
+from pathlib import Path
+
+html = r'''<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>صورة بخلفية بيضاء</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>منصة توزيع القوة البشرية</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js"></script>
+<meta name="theme-color" content="#07172b">
+<meta name="description" content="نموذج احترافي لتوزيع القوة البشرية على الأقسام ومطابقة المجموع المطلوب.">
 
-  <style>
-    * { box-sizing: border-box; font-family: Arial, sans-serif; }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #06142b, #0b2447);
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 16px;
-    }
-
-    .app {
-      width: 100%;
-      max-width: 430px;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 24px;
-      padding: 18px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
-      backdrop-filter: blur(12px);
-    }
-
-    h1 {
-      font-size: 24px;
-      margin: 0 0 8px;
-      text-align: center;
-    }
-
-    p {
-      margin: 0 0 16px;
-      font-size: 14px;
-      color: #dbeafe;
-      text-align: center;
-      line-height: 1.7;
-    }
-
-    .preview-box {
-      overflow: hidden;
-      border-radius: 22px;
-      background: white;
-      aspect-ratio: 3 / 4;
-      margin-bottom: 14px;
-      border: 3px solid rgba(255,255,255,0.25);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    canvas {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: none;
-      background: white;
-    }
-
-    .placeholder {
-      color: #64748b;
-      text-align: center;
-      padding: 20px;
-      line-height: 1.7;
-      font-weight: bold;
-    }
-
-    .buttons {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-
-    button, label {
-      border: none;
-      border-radius: 16px;
-      padding: 15px 12px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      text-align: center;
-      transition: 0.2s;
-    }
-
-    button:active, label:active { transform: scale(0.98); }
-
-    .primary {
-      background: #38bdf8;
-      color: #00111f;
-    }
-
-    .save {
-      background: #22c55e;
-      color: #02130a;
-    }
-
-    .save:disabled {
-      background: rgba(255,255,255,0.18);
-      color: rgba(255,255,255,0.55);
-      cursor: not-allowed;
-    }
-
-    .status {
-      margin-top: 12px;
-      font-size: 13px;
-      color: #bfdbfe;
-      text-align: center;
-      min-height: 22px;
-      line-height: 1.6;
-    }
-
-    .signature {
-      margin-top: 14px;
-      text-align: center;
-      font-size: 13px;
-      color: #93c5fd;
-      font-weight: bold;
-      letter-spacing: 1px;
-    }
-
-    .note {
-      margin-top: 12px;
-      font-size: 12px;
-      color: #cbd5e1;
-      line-height: 1.6;
-      text-align: center;
-    }
-  </style>
+<style>
+*{box-sizing:border-box}
+:root{
+  --navy:#07172b;
+  --navy2:#0b1f3a;
+  --blue:#123d6b;
+  --green:#138a36;
+  --red:#c62828;
+  --gold:#c8a24a;
+  --light:#f4f7fb;
+  --border:#d7dde6;
+}
+body{
+  margin:0;
+  font-family:Tahoma, Arial, sans-serif;
+  background:
+    radial-gradient(circle at top right, rgba(200,162,74,.20), transparent 28%),
+    linear-gradient(135deg,#061425,#0b1f3a 55%,#123d6b);
+  min-height:100vh;
+  padding:14px;
+  color:#111827;
+}
+.app{
+  max-width:1180px;
+  margin:auto;
+  background:#fff;
+  border-radius:22px;
+  overflow:hidden;
+  box-shadow:0 22px 55px rgba(0,0,0,.32);
+}
+.hero{
+  background:linear-gradient(135deg,#061425,#0b1f3a);
+  color:white;
+  padding:26px 16px;
+  text-align:center;
+  position:relative;
+}
+.badge{
+  width:72px;
+  height:72px;
+  margin:0 auto 12px;
+  border-radius:50%;
+  border:3px solid var(--gold);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:34px;
+  background:rgba(255,255,255,.06);
+}
+.hero h1{
+  margin:0;
+  font-size:28px;
+  letter-spacing:.2px;
+}
+.hero p{
+  margin:10px 0 0;
+  color:#cbd5e1;
+  font-size:15px;
+}
+.info-bar{
+  display:grid;
+  grid-template-columns:1.2fr 1fr 1fr;
+  gap:12px;
+  padding:16px;
+  background:#eef3f8;
+}
+.info-card{
+  background:white;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:13px;
+  text-align:center;
+}
+.info-card label{
+  display:block;
+  font-weight:bold;
+  color:#334155;
+  margin-bottom:8px;
+}
+.info-card input{
+  font-size:18px;
+  font-weight:bold;
+}
+.table-wrap{
+  overflow-x:auto;
+  padding:16px;
+}
+table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  min-width:880px;
+  text-align:center;
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+}
+th{
+  background:var(--navy2);
+  color:white;
+  padding:13px 10px;
+  font-size:15px;
+  white-space:nowrap;
+}
+td{
+  border-top:1px solid var(--border);
+  border-left:1px solid var(--border);
+  padding:9px;
+  background:white;
+}
+td:last-child, th:last-child{border-left:0}
+input{
+  width:100%;
+  padding:11px;
+  border:1px solid #cbd5e1;
+  border-radius:11px;
+  text-align:center;
+  font-size:16px;
+  background:#fff;
+}
+input:focus{
+  outline:2px solid rgba(18,61,107,.25);
+  border-color:#123d6b;
+}
+.section-input{
+  min-width:180px;
+  font-weight:bold;
+}
+.total-cell{
+  font-size:19px;
+  font-weight:bold;
+  background:#f8fafc;
+  color:var(--navy);
+}
+.result{
+  margin:0 16px 14px;
+  border-radius:18px;
+  padding:20px;
+  text-align:center;
+  color:white;
+  font-size:23px;
+  font-weight:bold;
+  box-shadow:0 8px 20px rgba(0,0,0,.12);
+}
+.green{background:linear-gradient(135deg,#0d6b2c,#16a34a)}
+.red{background:linear-gradient(135deg,#991b1b,#dc2626)}
+.actions{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  padding:0 16px 18px;
+  flex-wrap:wrap;
+}
+button{
+  border:0;
+  border-radius:14px;
+  padding:13px 20px;
+  background:var(--blue);
+  color:white;
+  font-weight:bold;
+  font-size:15px;
+  cursor:pointer;
+  box-shadow:0 4px 12px rgba(0,0,0,.14);
+}
+button.gray{background:#4b5563}
+button.gold{background:#8a6a18}
+.note{
+  margin:0 16px 18px;
+  background:#fff8e6;
+  border:1px solid #f0d58a;
+  border-radius:14px;
+  padding:12px;
+  color:#59430b;
+  text-align:center;
+  font-size:14px;
+}
+.footer{
+  background:#f8fafc;
+  border-top:1px solid var(--border);
+  color:#64748b;
+  padding:12px;
+  text-align:center;
+  font-size:13px;
+}
+@media(max-width:850px){
+  body{padding:7px}
+  .hero h1{font-size:22px}
+  .info-bar{grid-template-columns:1fr}
+  .result{font-size:18px;margin:0 10px 12px}
+  .table-wrap{padding:10px}
+}
+@media print{
+  body{background:white;padding:0}
+  .app{box-shadow:none;border-radius:0}
+  .actions,.note{display:none}
+  input{border:0;background:white}
+  .hero{padding:18px}
+  button{display:none}
+}
+</style>
 </head>
+
 <body>
+<div class="app">
 
-  <div class="app">
-    <h1>صورة بخلفية بيضاء</h1>
-    <p>استورد صورة من الألبوم، وسيتم عزل الشخص وإضافة خلفية بيضاء مع فلترة بسيطة للوجه.</p>
+  <section class="hero">
+    <div class="badge">⚓</div>
+    <h1>منصة توزيع القوة البشرية</h1>
+    <p>نموذج احترافي لمتابعة توزيع الأفراد على الأقسام ومطابقة المجموع المطلوب</p>
+  </section>
 
-    <div class="preview-box">
-      <div id="placeholder" class="placeholder">لم يتم اختيار صورة بعد</div>
-      <canvas id="canvas"></canvas>
+  <section class="info-bar">
+    <div class="info-card">
+      <label>اسم الجهة / القطاع</label>
+      <input id="orgName" type="text" placeholder="اكتب اسم الجهة" oninput="updateMeta('orgName', this.value)">
     </div>
-
-    <div class="buttons">
-      <label class="primary">
-        استيراد من الألبوم
-        <input id="galleryFile" type="file" accept="image/*" style="display:none" onchange="processFilePhoto(event)">
-      </label>
-
-      <button id="saveBtn" class="save" onclick="saveToAlbum()" disabled>حفظ في الألبوم</button>
+    <div class="info-card">
+      <label>التاريخ</label>
+      <input id="reportDate" type="date" oninput="updateMeta('reportDate', this.value)">
     </div>
+    <div class="info-card">
+      <label>المجموع المطلوب</label>
+      <input id="targetTotal" type="number" min="0" value="100" oninput="updateTarget(this.value)">
+    </div>
+  </section>
 
-    <div id="status" class="status"></div>
-    <div class="signature">توقيع: أبو روان الحمدي</div>
-    <div class="note">ملاحظة: المتصفح لا يسمح بالحفظ التلقائي داخل ألبوم الصور مباشرة، لذلك زر الحفظ يفتح المشاركة أو التحميل لتحفظها في الصور.</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>م</th>
+          <th>اسم القسم</th>
+          <th>الموجود</th>
+          <th>الرخصة</th>
+          <th>الإجازة</th>
+          <th>المستشفى</th>
+          <th>مجموع القسم</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
   </div>
 
+  <div id="resultBox" class="result red">المجموع الحالي: 0 / المطلوب: 100</div>
+
+  <div class="actions">
+    <button onclick="saveData()">حفظ البيانات</button>
+    <button class="gold" onclick="exportText()">نسخ ملخص التوزيع</button>
+    <button onclick="window.print()">طباعة / حفظ PDF</button>
+    <button class="gray" onclick="resetData()">مسح البيانات</button>
+  </div>
+
+  <div class="note">
+    يتحول شريط المجموع إلى اللون الأخضر فقط عند تطابق مجموع جميع الأقسام مع المجموع المطلوب بالضبط، ويظهر باللون الأحمر عند وجود زيادة أو نقص.
+  </div>
+
+  <div class="footer">
+    نسخة HTML تعمل بدون إنترنت — يمكن مشاركتها مباشرة عبر الجوال أو البريد.
+  </div>
+
+</div>
+
 <script>
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
-  const statusText = document.getElementById('status');
-  const saveBtn = document.getElementById('saveBtn');
-  const placeholder = document.getElementById('placeholder');
+const today = new Date().toISOString().slice(0,10);
 
-  let latestSegmentationMask = null;
-  let selfieSegmentation = null;
-  let finalBlob = null;
+const defaultData = {
+  orgName:"",
+  reportDate: today,
+  targetTotal: 100,
+  rows: [
+    {name:"", present:0, license:0, leave:0, hospital:0},
+    {name:"", present:0, license:0, leave:0, hospital:0},
+    {name:"", present:0, license:0, leave:0, hospital:0},
+    {name:"", present:0, license:0, leave:0, hospital:0},
+    {name:"", present:0, license:0, leave:0, hospital:0}
+  ]
+};
 
-  function setStatus(text) {
-    statusText.textContent = text;
+let data = JSON.parse(localStorage.getItem("finalManpowerDistributionApp") || "null") || JSON.parse(JSON.stringify(defaultData));
+
+function num(v){ return Number(v) || 0; }
+function clean(v){ return String(v ?? "").replace(/"/g, '&quot;'); }
+
+function render(){
+  document.getElementById("orgName").value = data.orgName || "";
+  document.getElementById("reportDate").value = data.reportDate || today;
+  document.getElementById("targetTotal").value = data.targetTotal;
+
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+
+  data.rows.forEach((r, i)=>{
+    const sectionTotal = num(r.present) + num(r.license) + num(r.leave) + num(r.hospital);
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td><input class="section-input" type="text" placeholder="اكتب اسم القسم" value="${clean(r.name)}" oninput="updateRow(${i}, 'name', this.value)"></td>
+      <td><input type="number" min="0" value="${num(r.present)}" oninput="updateRow(${i}, 'present', this.value)"></td>
+      <td><input type="number" min="0" value="${num(r.license)}" oninput="updateRow(${i}, 'license', this.value)"></td>
+      <td><input type="number" min="0" value="${num(r.leave)}" oninput="updateRow(${i}, 'leave', this.value)"></td>
+      <td><input type="number" min="0" value="${num(r.hospital)}" oninput="updateRow(${i}, 'hospital', this.value)"></td>
+      <td class="total-cell">${sectionTotal}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  calculateGrandTotal();
+}
+
+function updateMeta(field, value){
+  data[field] = value;
+}
+
+function updateTarget(value){
+  data.targetTotal = num(value);
+  calculateGrandTotal();
+}
+
+function updateRow(index, field, value){
+  data.rows[index][field] = field === "name" ? value : num(value);
+  render();
+}
+
+function calculateGrandTotal(){
+  let grandTotal = 0;
+  data.rows.forEach(r=>{
+    grandTotal += num(r.present) + num(r.license) + num(r.leave) + num(r.hospital);
+  });
+
+  const target = num(data.targetTotal);
+  const resultBox = document.getElementById("resultBox");
+  resultBox.className = "result " + (grandTotal === target ? "green" : "red");
+
+  if(grandTotal === target){
+    resultBox.textContent = `المجموع الحالي: ${grandTotal} / المطلوب: ${target} — التوزيع صحيح`;
+  }else if(grandTotal > target){
+    resultBox.textContent = `المجموع الحالي: ${grandTotal} / المطلوب: ${target} — يوجد زيادة ${grandTotal - target}`;
+  }else{
+    resultBox.textContent = `المجموع الحالي: ${grandTotal} / المطلوب: ${target} — يوجد نقص ${target - grandTotal}`;
   }
+}
 
-  async function initSegmentation() {
-    if (selfieSegmentation) return;
+function saveData(){
+  localStorage.setItem("finalManpowerDistributionApp", JSON.stringify(data));
+  alert("تم حفظ البيانات بنجاح");
+}
 
-    selfieSegmentation = new SelfieSegmentation({
-      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
-    });
-
-    selfieSegmentation.setOptions({
-      modelSelection: 1,
-      selfieMode: false
-    });
-
-    selfieSegmentation.onResults((results) => {
-      latestSegmentationMask = results.segmentationMask;
-    });
+function resetData(){
+  if(confirm("هل تريد مسح جميع البيانات والرجوع للنموذج الفارغ؟")){
+    data = JSON.parse(JSON.stringify(defaultData));
+    localStorage.removeItem("finalManpowerDistributionApp");
+    render();
   }
+}
 
-  async function processFilePhoto(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+function exportText(){
+  let grandTotal = 0;
+  let text = "ملخص توزيع القوة البشرية\n";
+  text += "الجهة: " + (data.orgName || "-") + "\n";
+  text += "التاريخ: " + (data.reportDate || "-") + "\n";
+  text += "المجموع المطلوب: " + data.targetTotal + "\n\n";
 
-    try {
-      setStatus('جاري تجهيز الصورة ومعالجة الخلفية...');
-      saveBtn.disabled = true;
-      finalBlob = null;
+  data.rows.forEach((r, i)=>{
+    const total = num(r.present) + num(r.license) + num(r.leave) + num(r.hospital);
+    grandTotal += total;
+    text += `${i+1}) ${r.name || "قسم بدون اسم"}: الموجود ${num(r.present)} | الرخصة ${num(r.license)} | الإجازة ${num(r.leave)} | المستشفى ${num(r.hospital)} | المجموع ${total}\n`;
+  });
 
-      await initSegmentation();
+  text += "\nالمجموع الحالي: " + grandTotal;
+  text += "\nالحالة: " + (grandTotal === num(data.targetTotal) ? "التوزيع صحيح" : (grandTotal > num(data.targetTotal) ? "يوجد زيادة " + (grandTotal - num(data.targetTotal)) : "يوجد نقص " + (num(data.targetTotal) - grandTotal)));
 
-      const img = new Image();
-      img.onload = async function () {
-        const maxSize = 1600;
-        let w = img.naturalWidth;
-        let h = img.naturalHeight;
+  navigator.clipboard.writeText(text).then(()=>{
+    alert("تم نسخ ملخص التوزيع");
+  }).catch(()=>{
+    alert(text);
+  });
+}
 
-        if (w > maxSize || h > maxSize) {
-          const ratio = Math.min(maxSize / w, maxSize / h);
-          w = Math.round(w * ratio);
-          h = Math.round(h * ratio);
-        }
-
-        canvas.width = w;
-        canvas.height = h;
-
-        await selfieSegmentation.send({ image: img });
-        drawWhiteBackground(img, w, h);
-      };
-
-      img.onerror = function () {
-        setStatus('تعذر قراءة الصورة. جرّب صورة أخرى.');
-      };
-
-      img.src = URL.createObjectURL(file);
-    } catch (error) {
-      console.error(error);
-      setStatus('حدث خطأ أثناء المعالجة. تأكد من وجود اتصال بالإنترنت.');
-    }
-  }
-
-  function drawWhiteBackground(source, w, h) {
-    ctx.save();
-    ctx.clearRect(0, 0, w, h);
-
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, w, h);
-
-    if (latestSegmentationMask) {
-      ctx.drawImage(latestSegmentationMask, 0, 0, w, h);
-      ctx.globalCompositeOperation = 'source-in';
-
-      ctx.filter = 'brightness(1.08) contrast(1.04) saturate(1.06) blur(0.2px)';
-      ctx.drawImage(source, 0, 0, w, h);
-
-      ctx.globalCompositeOperation = 'destination-over';
-      ctx.filter = 'none';
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, w, h);
-    } else {
-      ctx.filter = 'brightness(1.08) contrast(1.04) saturate(1.06)';
-      ctx.drawImage(source, 0, 0, w, h);
-      ctx.filter = 'none';
-    }
-
-    ctx.restore();
-
-    placeholder.style.display = 'none';
-    canvas.style.display = 'block';
-
-    canvas.toBlob((blob) => {
-      finalBlob = blob;
-      saveBtn.disabled = false;
-      setStatus('تمت المعالجة. اضغط حفظ في الألبوم.');
-    }, 'image/png', 1);
-  }
-
-  async function saveToAlbum() {
-    if (!finalBlob) {
-      setStatus('استورد صورة أولاً.');
-      return;
-    }
-
-    const fileName = 'white-background-photo.png';
-    const imageFile = new File([finalBlob], fileName, { type: 'image/png' });
-
-    try {
-      if (navigator.canShare && navigator.canShare({ files: [imageFile] })) {
-        await navigator.share({
-          files: [imageFile],
-          title: 'صورة بخلفية بيضاء',
-          text: 'صورة معالجة بخلفية بيضاء'
-        });
-        setStatus('اختر حفظ الصورة من نافذة المشاركة.');
-      } else {
-        const url = URL.createObjectURL(finalBlob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-        setStatus('تم تحميل الصورة. افتح التنزيلات ثم احفظها في الصور.');
-      }
-    } catch (error) {
-      console.error(error);
-      setStatus('لم يتم الحفظ. حاول مرة أخرى.');
-    }
-  }
+render();
 </script>
-
 </body>
 </html>
+'''
+
+path = Path("/mnt/data/final_manpower_distribution_app.html")
+path.write_text(html, encoding="utf-8")
+path.as_posix(
