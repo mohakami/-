@@ -1,399 +1,126 @@
 from pathlib import Path
 
-html = r'''<!DOCTYPE html>
+html = """<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>منصة توزيع القوة البشرية</title>
-
+<title>توزيع القوة البشرية</title>
 <meta name="theme-color" content="#07172b">
-<meta name="description" content="نموذج احترافي لتوزيع القوة البشرية على الأقسام ومطابقة المجموع المطلوب.">
-
 <style>
 *{box-sizing:border-box}
-:root{
-  --navy:#07172b;
-  --navy2:#0b1f3a;
-  --blue:#123d6b;
-  --green:#138a36;
-  --red:#c62828;
-  --gold:#c8a24a;
-  --light:#f4f7fb;
-  --border:#d7dde6;
-}
-body{
-  margin:0;
-  font-family:Tahoma, Arial, sans-serif;
-  background:
-    radial-gradient(circle at top right, rgba(200,162,74,.20), transparent 28%),
-    linear-gradient(135deg,#061425,#0b1f3a 55%,#123d6b);
-  min-height:100vh;
-  padding:14px;
-  color:#111827;
-}
-.app{
-  max-width:1180px;
-  margin:auto;
-  background:#fff;
-  border-radius:22px;
-  overflow:hidden;
-  box-shadow:0 22px 55px rgba(0,0,0,.32);
-}
-.hero{
-  background:linear-gradient(135deg,#061425,#0b1f3a);
-  color:white;
-  padding:26px 16px;
-  text-align:center;
-  position:relative;
-}
-.badge{
-  width:72px;
-  height:72px;
-  margin:0 auto 12px;
-  border-radius:50%;
-  border:3px solid var(--gold);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:34px;
-  background:rgba(255,255,255,.06);
-}
-.hero h1{
-  margin:0;
-  font-size:28px;
-  letter-spacing:.2px;
-}
-.hero p{
-  margin:10px 0 0;
-  color:#cbd5e1;
-  font-size:15px;
-}
-.info-bar{
-  display:grid;
-  grid-template-columns:1.2fr 1fr 1fr;
-  gap:12px;
-  padding:16px;
-  background:#eef3f8;
-}
-.info-card{
-  background:white;
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:13px;
-  text-align:center;
-}
-.info-card label{
-  display:block;
-  font-weight:bold;
-  color:#334155;
-  margin-bottom:8px;
-}
-.info-card input{
-  font-size:18px;
-  font-weight:bold;
-}
-.table-wrap{
-  overflow-x:auto;
-  padding:16px;
-}
-table{
-  width:100%;
-  border-collapse:separate;
-  border-spacing:0;
-  min-width:880px;
-  text-align:center;
-  border:1px solid var(--border);
-  border-radius:16px;
-  overflow:hidden;
-}
-th{
-  background:var(--navy2);
-  color:white;
-  padding:13px 10px;
-  font-size:15px;
-  white-space:nowrap;
-}
-td{
-  border-top:1px solid var(--border);
-  border-left:1px solid var(--border);
-  padding:9px;
-  background:white;
-}
-td:last-child, th:last-child{border-left:0}
-input{
-  width:100%;
-  padding:11px;
-  border:1px solid #cbd5e1;
-  border-radius:11px;
-  text-align:center;
-  font-size:16px;
-  background:#fff;
-}
-input:focus{
-  outline:2px solid rgba(18,61,107,.25);
-  border-color:#123d6b;
-}
-.section-input{
-  min-width:180px;
-  font-weight:bold;
-}
-.total-cell{
-  font-size:19px;
-  font-weight:bold;
-  background:#f8fafc;
-  color:var(--navy);
-}
-.result{
-  margin:0 16px 14px;
-  border-radius:18px;
-  padding:20px;
-  text-align:center;
-  color:white;
-  font-size:23px;
-  font-weight:bold;
-  box-shadow:0 8px 20px rgba(0,0,0,.12);
-}
-.green{background:linear-gradient(135deg,#0d6b2c,#16a34a)}
-.red{background:linear-gradient(135deg,#991b1b,#dc2626)}
-.actions{
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  padding:0 16px 18px;
-  flex-wrap:wrap;
-}
-button{
-  border:0;
-  border-radius:14px;
-  padding:13px 20px;
-  background:var(--blue);
-  color:white;
-  font-weight:bold;
-  font-size:15px;
-  cursor:pointer;
-  box-shadow:0 4px 12px rgba(0,0,0,.14);
-}
-button.gray{background:#4b5563}
-button.gold{background:#8a6a18}
-.note{
-  margin:0 16px 18px;
-  background:#fff8e6;
-  border:1px solid #f0d58a;
-  border-radius:14px;
-  padding:12px;
-  color:#59430b;
-  text-align:center;
-  font-size:14px;
-}
-.footer{
-  background:#f8fafc;
-  border-top:1px solid var(--border);
-  color:#64748b;
-  padding:12px;
-  text-align:center;
-  font-size:13px;
-}
-@media(max-width:850px){
-  body{padding:7px}
-  .hero h1{font-size:22px}
-  .info-bar{grid-template-columns:1fr}
-  .result{font-size:18px;margin:0 10px 12px}
-  .table-wrap{padding:10px}
-}
-@media print{
-  body{background:white;padding:0}
-  .app{box-shadow:none;border-radius:0}
-  .actions,.note{display:none}
-  input{border:0;background:white}
-  .hero{padding:18px}
-  button{display:none}
-}
+:root{--navy:#07172b;--navy2:#0b1f3a;--blue:#123d6b;--green:#138a36;--red:#c62828;--gold:#c8a24a;--border:#d7dde6}
+body{margin:0;font-family:Tahoma,Arial,sans-serif;background:#0b1f3a;padding:8px;color:#111827}
+.app{max-width:1000px;margin:auto;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 12px 35px rgba(0,0,0,.28)}
+.hero{background:linear-gradient(135deg,#061425,#0b1f3a);color:white;padding:22px 12px;text-align:center}
+.badge{width:60px;height:60px;margin:0 auto 10px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:30px}
+.hero h1{margin:0;font-size:22px}.hero p{margin:8px 0 0;color:#cbd5e1;font-size:13px;line-height:1.7}
+.top{padding:12px;background:#eef3f8;display:grid;gap:10px}
+.field{background:white;border:1px solid var(--border);border-radius:14px;padding:10px}
+label{display:block;font-weight:bold;color:#334155;margin-bottom:7px;font-size:14px}
+input{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:12px;text-align:center;font-size:17px;background:white}
+input:focus{outline:2px solid rgba(18,61,107,.25);border-color:#123d6b}
+.sections{padding:12px;display:grid;gap:12px}
+.card{border:1px solid var(--border);border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.06)}
+.card-title{background:#0b1f3a;color:white;padding:12px;font-weight:bold;text-align:center}
+.card-body{padding:12px;display:grid;gap:10px}.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.total{background:#f8fafc;border-top:1px solid var(--border);padding:13px;text-align:center;font-size:20px;font-weight:bold;color:#07172b}
+.result{margin:0 12px 12px;border-radius:16px;padding:18px 12px;text-align:center;color:white;font-size:18px;font-weight:bold;line-height:1.7}
+.green{background:linear-gradient(135deg,#0d6b2c,#16a34a)}.red{background:linear-gradient(135deg,#991b1b,#dc2626)}
+.summary-box{margin:0 12px 14px;border:1px solid var(--border);border-radius:18px;overflow:hidden;background:white}
+.summary-title{background:#07172b;color:white;text-align:center;padding:13px;font-weight:bold;font-size:17px}
+.summary-table{width:100%;border-collapse:collapse;text-align:center}
+.summary-table th{background:#eef3f8;padding:12px;border:1px solid var(--border);color:#0b1f3a}
+.summary-table td{padding:12px;border:1px solid var(--border);font-size:17px;font-weight:bold}
+.summary-total{background:#f8fafc;color:#07172b}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:0 12px 14px}
+button{border:0;border-radius:13px;padding:13px 10px;background:var(--blue);color:white;font-weight:bold;font-size:14px}
+button.gray{background:#4b5563}button.gold{background:#8a6a18}
+.note{margin:0 12px 14px;background:#fff8e6;border:1px solid #f0d58a;border-radius:14px;padding:10px;color:#59430b;text-align:center;font-size:13px;line-height:1.7}
+.footer{background:#f8fafc;border-top:1px solid var(--border);color:#64748b;padding:10px;text-align:center;font-size:12px}
+@media(min-width:850px){body{padding:14px}.hero h1{font-size:28px}.top{grid-template-columns:1.2fr 1fr 1fr;padding:16px}.sections{grid-template-columns:1fr 1fr;padding:16px}.actions{display:flex;justify-content:center}button{padding:13px 20px;font-size:15px}}
+@media(max-width:420px){.grid-2{grid-template-columns:1fr}.actions{grid-template-columns:1fr}.summary-table th,.summary-table td{padding:9px;font-size:14px}}
+@media print{@page{size:A4;margin:10mm}body{background:white;padding:0;color:#000}.app{box-shadow:none;border-radius:0;max-width:100%}.hero{padding:14px;background:#07172b!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.hero p,.badge,.note,.actions,.footer{display:none}.top{grid-template-columns:1fr 1fr 1fr;padding:10px;background:#fff}.field{border:1px solid #000;border-radius:0;padding:6px}input{border:0;padding:4px;font-size:14px}.sections{display:block;padding:8px}.card{box-shadow:none;border:1px solid #000;border-radius:0;margin-bottom:8px;page-break-inside:avoid}.card-title{background:#eee!important;color:#000;border-bottom:1px solid #000;-webkit-print-color-adjust:exact;print-color-adjust:exact}.card-body{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:6px}.grid-2{grid-template-columns:1fr 1fr}.total{border-top:1px solid #000;padding:6px;font-size:15px}.result{margin:8px;color:#000;border:1px solid #000;background:#fff!important;padding:8px;font-size:15px}.summary-box{margin:8px;border:1px solid #000;border-radius:0;page-break-inside:avoid}.summary-title{background:#eee!important;color:#000;border-bottom:1px solid #000;-webkit-print-color-adjust:exact;print-color-adjust:exact}.summary-table th,.summary-table td{border:1px solid #000;padding:8px;font-size:14px}}
 </style>
 </head>
-
 <body>
 <div class="app">
-
-  <section class="hero">
-    <div class="badge">⚓</div>
-    <h1>منصة توزيع القوة البشرية</h1>
-    <p>نموذج احترافي لمتابعة توزيع الأفراد على الأقسام ومطابقة المجموع المطلوب</p>
-  </section>
-
-  <section class="info-bar">
-    <div class="info-card">
-      <label>اسم الجهة / القطاع</label>
-      <input id="orgName" type="text" placeholder="اكتب اسم الجهة" oninput="updateMeta('orgName', this.value)">
-    </div>
-    <div class="info-card">
-      <label>التاريخ</label>
-      <input id="reportDate" type="date" oninput="updateMeta('reportDate', this.value)">
-    </div>
-    <div class="info-card">
-      <label>المجموع المطلوب</label>
-      <input id="targetTotal" type="number" min="0" value="100" oninput="updateTarget(this.value)">
-    </div>
-  </section>
-
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>م</th>
-          <th>اسم القسم</th>
-          <th>الموجود</th>
-          <th>الرخصة</th>
-          <th>الإجازة</th>
-          <th>المستشفى</th>
-          <th>مجموع القسم</th>
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
-  </div>
-
-  <div id="resultBox" class="result red">المجموع الحالي: 0 / المطلوب: 100</div>
-
-  <div class="actions">
-    <button onclick="saveData()">حفظ البيانات</button>
-    <button class="gold" onclick="exportText()">نسخ ملخص التوزيع</button>
-    <button onclick="window.print()">طباعة / حفظ PDF</button>
-    <button class="gray" onclick="resetData()">مسح البيانات</button>
-  </div>
-
-  <div class="note">
-    يتحول شريط المجموع إلى اللون الأخضر فقط عند تطابق مجموع جميع الأقسام مع المجموع المطلوب بالضبط، ويظهر باللون الأحمر عند وجود زيادة أو نقص.
-  </div>
-
-  <div class="footer">
-    نسخة HTML تعمل بدون إنترنت — يمكن مشاركتها مباشرة عبر الجوال أو البريد.
-  </div>
-
+<section class="hero"><div class="badge">⚓</div><h1>منصة توزيع القوة البشرية</h1><p>نموذج مناسب للجوال مع جدول إجماليات جاهز للطباعة PDF</p></section>
+<section class="top">
+<div class="field"><label>اسم الجهة / القطاع</label><input id="orgName" type="text" placeholder="اكتب اسم الجهة"></div>
+<div class="field"><label>التاريخ</label><input id="reportDate" type="date"></div>
+<div class="field"><label>المجموع المطلوب</label><input id="targetTotal" type="number" min="0" value="100"></div>
+</section>
+<section class="sections" id="sections"></section>
+<div id="resultBox" class="result red">المجموع الحالي: 0 / المطلوب: 100</div>
+<section class="summary-box">
+<div class="summary-title">المجموع الكلي للقوة البشرية</div>
+<table class="summary-table">
+<thead><tr><th>البيان</th><th>الإجمالي</th></tr></thead>
+<tbody>
+<tr><td>إجمالي الموجود</td><td id="sumPresent">0</td></tr>
+<tr><td>إجمالي الرخصة</td><td id="sumLicense">0</td></tr>
+<tr><td>إجمالي الإجازة</td><td id="sumLeave">0</td></tr>
+<tr><td>إجمالي المستشفى</td><td id="sumHospital">0</td></tr>
+<tr class="summary-total"><td>الإجمالي العام</td><td id="sumGrand">0</td></tr>
+</tbody>
+</table>
+</section>
+<div class="actions"><button onclick="saveData()">حفظ البيانات</button><button class="gold" onclick="exportText()">نسخ الملخص</button><button onclick="window.print()">طباعة / حفظ PDF</button><button class="gray" onclick="resetData()">مسح البيانات</button></div>
+<div class="note">يظهر جدول المجموع الكلي أسفل الصفحة ويُطبع مع التقرير عند اختيار طباعة / حفظ PDF.</div>
+<div class="footer">ملف HTML يعمل بدون إنترنت وجاهز للمشاركة عبر الجوال.</div>
 </div>
-
 <script>
 const today = new Date().toISOString().slice(0,10);
-
-const defaultData = {
-  orgName:"",
-  reportDate: today,
-  targetTotal: 100,
-  rows: [
-    {name:"", present:0, license:0, leave:0, hospital:0},
-    {name:"", present:0, license:0, leave:0, hospital:0},
-    {name:"", present:0, license:0, leave:0, hospital:0},
-    {name:"", present:0, license:0, leave:0, hospital:0},
-    {name:"", present:0, license:0, leave:0, hospital:0}
-  ]
-};
-
-let data = JSON.parse(localStorage.getItem("finalManpowerDistributionApp") || "null") || JSON.parse(JSON.stringify(defaultData));
-
-function num(v){ return Number(v) || 0; }
-function clean(v){ return String(v ?? "").replace(/"/g, '&quot;'); }
-
-function render(){
-  document.getElementById("orgName").value = data.orgName || "";
-  document.getElementById("reportDate").value = data.reportDate || today;
-  document.getElementById("targetTotal").value = data.targetTotal;
-
-  const tbody = document.getElementById("tbody");
-  tbody.innerHTML = "";
-
-  data.rows.forEach((r, i)=>{
-    const sectionTotal = num(r.present) + num(r.license) + num(r.leave) + num(r.hospital);
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${i+1}</td>
-      <td><input class="section-input" type="text" placeholder="اكتب اسم القسم" value="${clean(r.name)}" oninput="updateRow(${i}, 'name', this.value)"></td>
-      <td><input type="number" min="0" value="${num(r.present)}" oninput="updateRow(${i}, 'present', this.value)"></td>
-      <td><input type="number" min="0" value="${num(r.license)}" oninput="updateRow(${i}, 'license', this.value)"></td>
-      <td><input type="number" min="0" value="${num(r.leave)}" oninput="updateRow(${i}, 'leave', this.value)"></td>
-      <td><input type="number" min="0" value="${num(r.hospital)}" oninput="updateRow(${i}, 'hospital', this.value)"></td>
-      <td class="total-cell">${sectionTotal}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  calculateGrandTotal();
+const defaultData={orgName:"",reportDate:today,targetTotal:100,rows:[{name:"",present:0,license:0,leave:0,hospital:0},{name:"",present:0,license:0,leave:0,hospital:0},{name:"",present:0,license:0,leave:0,hospital:0},{name:"",present:0,license:0,leave:0,hospital:0},{name:"",present:0,license:0,leave:0,hospital:0}]};
+let data=JSON.parse(localStorage.getItem("mobileManpowerWithSummary")||"null")||JSON.parse(JSON.stringify(defaultData));
+function num(v){return Number(v)||0}
+function escapeHtml(str){return String(str??"").replaceAll("&","&amp;").replaceAll('"',"&quot;").replaceAll("<","&lt;").replaceAll(">","&gt;")}
+function buildOnce(){
+document.getElementById("orgName").value=data.orgName||"";
+document.getElementById("reportDate").value=data.reportDate||today;
+document.getElementById("targetTotal").value=data.targetTotal;
+const sections=document.getElementById("sections");sections.innerHTML="";
+data.rows.forEach((r,i)=>{const card=document.createElement("div");card.className="card";card.innerHTML=`<div class="card-title">القسم رقم ${i+1}</div><div class="card-body"><div class="field"><label>اسم القسم</label><input type="text" placeholder="اكتب اسم القسم" data-row="${i}" data-field="name" value="${escapeHtml(r.name)}"></div><div class="grid-2"><div class="field"><label>الموجود</label><input type="number" min="0" data-row="${i}" data-field="present" value="${num(r.present)}"></div><div class="field"><label>الرخصة</label><input type="number" min="0" data-row="${i}" data-field="license" value="${num(r.license)}"></div><div class="field"><label>الإجازة</label><input type="number" min="0" data-row="${i}" data-field="leave" value="${num(r.leave)}"></div><div class="field"><label>المستشفى</label><input type="number" min="0" data-row="${i}" data-field="hospital" value="${num(r.hospital)}"></div></div></div><div class="total" id="rowTotal${i}">مجموع القسم: 0</div>`;sections.appendChild(card)});
+document.querySelectorAll("input[data-row]").forEach(input=>{input.addEventListener("input",function(){const row=Number(this.dataset.row);const field=this.dataset.field;data.rows[row][field]=field==="name"?this.value:num(this.value);updateTotalsOnly()})});
+document.getElementById("orgName").addEventListener("input",e=>data.orgName=e.target.value);
+document.getElementById("reportDate").addEventListener("input",e=>data.reportDate=e.target.value);
+document.getElementById("targetTotal").addEventListener("input",e=>{data.targetTotal=num(e.target.value);updateTotalsOnly()});
+updateTotalsOnly()
 }
-
-function updateMeta(field, value){
-  data[field] = value;
+function updateTotalsOnly(){
+let grandTotal=0,totalPresent=0,totalLicense=0,totalLeave=0,totalHospital=0;
+data.rows.forEach((r,i)=>{const present=num(r.present),license=num(r.license),leave=num(r.leave),hospital=num(r.hospital);const total=present+license+leave+hospital;totalPresent+=present;totalLicense+=license;totalLeave+=leave;totalHospital+=hospital;grandTotal+=total;document.getElementById("rowTotal"+i).textContent="مجموع القسم: "+total});
+document.getElementById("sumPresent").textContent=totalPresent;
+document.getElementById("sumLicense").textContent=totalLicense;
+document.getElementById("sumLeave").textContent=totalLeave;
+document.getElementById("sumHospital").textContent=totalHospital;
+document.getElementById("sumGrand").textContent=grandTotal;
+const target=num(data.targetTotal);const resultBox=document.getElementById("resultBox");resultBox.className="result "+(grandTotal===target?"green":"red");
+if(grandTotal===target){resultBox.textContent=`المجموع الحالي: ${grandTotal} / المطلوب: ${target} — التوزيع صحيح`}else if(grandTotal>target){resultBox.textContent=`المجموع الحالي: ${grandTotal} / المطلوب: ${target} — يوجد زيادة ${grandTotal-target}`}else{resultBox.textContent=`المجموع الحالي: ${grandTotal} / المطلوب: ${target} — يوجد نقص ${target-grandTotal}`}
 }
-
-function updateTarget(value){
-  data.targetTotal = num(value);
-  calculateGrandTotal();
-}
-
-function updateRow(index, field, value){
-  data.rows[index][field] = field === "name" ? value : num(value);
-  render();
-}
-
-function calculateGrandTotal(){
-  let grandTotal = 0;
-  data.rows.forEach(r=>{
-    grandTotal += num(r.present) + num(r.license) + num(r.leave) + num(r.hospital);
-  });
-
-  const target = num(data.targetTotal);
-  const resultBox = document.getElementById("resultBox");
-  resultBox.className = "result " + (grandTotal === target ? "green" : "red");
-
-  if(grandTotal === target){
-    resultBox.textContent = `المجموع الحالي: ${grandTotal} / المطلوب: ${target} — التوزيع صحيح`;
-  }else if(grandTotal > target){
-    resultBox.textContent = `المجموع الحالي: ${grandTotal} / المطلوب: ${target} — يوجد زيادة ${grandTotal - target}`;
-  }else{
-    resultBox.textContent = `المجموع الحالي: ${grandTotal} / المطلوب: ${target} — يوجد نقص ${target - grandTotal}`;
-  }
-}
-
-function saveData(){
-  localStorage.setItem("finalManpowerDistributionApp", JSON.stringify(data));
-  alert("تم حفظ البيانات بنجاح");
-}
-
-function resetData(){
-  if(confirm("هل تريد مسح جميع البيانات والرجوع للنموذج الفارغ؟")){
-    data = JSON.parse(JSON.stringify(defaultData));
-    localStorage.removeItem("finalManpowerDistributionApp");
-    render();
-  }
-}
-
+function saveData(){localStorage.setItem("mobileManpowerWithSummary",JSON.stringify(data));alert("تم حفظ البيانات بنجاح")}
+function resetData(){if(confirm("هل تريد مسح جميع البيانات؟")){data=JSON.parse(JSON.stringify(defaultData));localStorage.removeItem("mobileManpowerWithSummary");buildOnce()}}
 function exportText(){
-  let grandTotal = 0;
-  let text = "ملخص توزيع القوة البشرية\n";
-  text += "الجهة: " + (data.orgName || "-") + "\n";
-  text += "التاريخ: " + (data.reportDate || "-") + "\n";
-  text += "المجموع المطلوب: " + data.targetTotal + "\n\n";
-
-  data.rows.forEach((r, i)=>{
-    const total = num(r.present) + num(r.license) + num(r.leave) + num(r.hospital);
-    grandTotal += total;
-    text += `${i+1}) ${r.name || "قسم بدون اسم"}: الموجود ${num(r.present)} | الرخصة ${num(r.license)} | الإجازة ${num(r.leave)} | المستشفى ${num(r.hospital)} | المجموع ${total}\n`;
-  });
-
-  text += "\nالمجموع الحالي: " + grandTotal;
-  text += "\nالحالة: " + (grandTotal === num(data.targetTotal) ? "التوزيع صحيح" : (grandTotal > num(data.targetTotal) ? "يوجد زيادة " + (grandTotal - num(data.targetTotal)) : "يوجد نقص " + (num(data.targetTotal) - grandTotal)));
-
-  navigator.clipboard.writeText(text).then(()=>{
-    alert("تم نسخ ملخص التوزيع");
-  }).catch(()=>{
-    alert(text);
-  });
+let grandTotal=0,totalPresent=0,totalLicense=0,totalLeave=0,totalHospital=0;
+let text="ملخص توزيع القوة البشرية\\n";
+text+="الجهة: "+(data.orgName||"-")+"\\n";
+text+="التاريخ: "+(data.reportDate||"-")+"\\n";
+text+="المجموع المطلوب: "+data.targetTotal+"\\n\\n";
+data.rows.forEach((r,i)=>{const present=num(r.present),license=num(r.license),leave=num(r.leave),hospital=num(r.hospital);const total=present+license+leave+hospital;totalPresent+=present;totalLicense+=license;totalLeave+=leave;totalHospital+=hospital;grandTotal+=total;text+=`${i+1}) ${r.name||"قسم بدون اسم"}: الموجود ${present} | الرخصة ${license} | الإجازة ${leave} | المستشفى ${hospital} | المجموع ${total}\\n`});
+text+="\\nالمجموع الكلي:\\n";
+text+="إجمالي الموجود: "+totalPresent+"\\n";
+text+="إجمالي الرخصة: "+totalLicense+"\\n";
+text+="إجمالي الإجازة: "+totalLeave+"\\n";
+text+="إجمالي المستشفى: "+totalHospital+"\\n";
+text+="الإجمالي العام: "+grandTotal+"\\n";
+navigator.clipboard.writeText(text).then(()=>alert("تم نسخ الملخص")).catch(()=>alert(text))
 }
-
-render();
+buildOnce();
 </script>
 </body>
-</html>
-'''
+</html>"""
 
-path = Path("/mnt/data/final_manpower_distribution_app.html")
+path = Path("/mnt/data/mobile_manpower_with_summary_pdf.html")
 path.write_text(html, encoding="utf-8")
-path.as_posix(
+print(path)
