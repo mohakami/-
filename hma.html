@@ -1,393 +1,747 @@
-from pathlib import Path
-
-html = r'''<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>توزيع القوة البشرية</title>
-<meta name="theme-color" content="#07172b">
-<style>
-*{box-sizing:border-box}
-:root{
-  --navy:#07172b;
-  --navy2:#0b1f3a;
-  --blue:#123d6b;
-  --green:#138a36;
-  --red:#c62828;
-  --gold:#c8a24a;
-  --border:#d7dde6;
-  --bg:#f4f7fb;
-}
-body{
-  margin:0;
-  font-family:Tahoma, Arial, sans-serif;
-  background:#0b1f3a;
-  padding:8px;
-  color:#111827;
-}
-.app{
-  max-width:980px;
-  margin:auto;
-  background:#fff;
-  border-radius:18px;
-  overflow:hidden;
-  box-shadow:0 12px 35px rgba(0,0,0,.28);
-}
-.hero{
-  background:linear-gradient(135deg,#061425,#0b1f3a);
-  color:white;
-  padding:22px 12px;
-  text-align:center;
-}
-.badge{
-  width:60px;
-  height:60px;
-  margin:0 auto 10px;
-  border-radius:50%;
-  border:2px solid var(--gold);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:30px;
-}
-.hero h1{
-  margin:0;
-  font-size:22px;
-}
-.hero p{
-  margin:8px 0 0;
-  color:#cbd5e1;
-  font-size:13px;
-  line-height:1.7;
-}
-.top{
-  padding:12px;
-  background:#eef3f8;
-  display:grid;
-  gap:10px;
-}
-.field{
-  background:white;
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:10px;
-}
-label{
-  display:block;
-  font-weight:bold;
-  color:#334155;
-  margin-bottom:7px;
-  font-size:14px;
-}
-input{
-  width:100%;
-  padding:13px;
-  border:1px solid #cbd5e1;
-  border-radius:12px;
-  text-align:center;
-  font-size:17px;
-  background:white;
-}
-input:focus{
-  outline:2px solid rgba(18,61,107,.25);
-  border-color:#123d6b;
-}
-.sections{
-  padding:12px;
-  display:grid;
-  gap:12px;
-}
-.card{
-  border:1px solid var(--border);
-  border-radius:18px;
-  overflow:hidden;
-  background:#fff;
-  box-shadow:0 4px 14px rgba(0,0,0,.06);
-}
-.card-title{
-  background:#0b1f3a;
-  color:white;
-  padding:12px;
-  font-weight:bold;
-  text-align:center;
-}
-.card-body{
-  padding:12px;
-  display:grid;
-  gap:10px;
-}
-.grid-2{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-.total{
-  background:#f8fafc;
-  border-top:1px solid var(--border);
-  padding:13px;
-  text-align:center;
-  font-size:20px;
-  font-weight:bold;
-  color:#07172b;
-}
-.result{
-  margin:0 12px 12px;
-  border-radius:16px;
-  padding:18px 12px;
-  text-align:center;
-  color:white;
-  font-size:18px;
-  font-weight:bold;
-  line-height:1.7;
-}
-.green{background:linear-gradient(135deg,#0d6b2c,#16a34a)}
-.red{background:linear-gradient(135deg,#991b1b,#dc2626)}
-.actions{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:9px;
-  padding:0 12px 14px;
-}
-button{
-  border:0;
-  border-radius:13px;
-  padding:13px 10px;
-  background:var(--blue);
-  color:white;
-  font-weight:bold;
-  font-size:14px;
-}
-button.gray{background:#4b5563}
-button.gold{background:#8a6a18}
-.note{
-  margin:0 12px 14px;
-  background:#fff8e6;
-  border:1px solid #f0d58a;
-  border-radius:14px;
-  padding:10px;
-  color:#59430b;
-  text-align:center;
-  font-size:13px;
-  line-height:1.7;
-}
-.footer{
-  background:#f8fafc;
-  border-top:1px solid var(--border);
-  color:#64748b;
-  padding:10px;
-  text-align:center;
-  font-size:12px;
-}
-@media(min-width:850px){
-  body{padding:14px}
-  .hero h1{font-size:28px}
-  .top{grid-template-columns:1.2fr 1fr 1fr;padding:16px}
-  .sections{grid-template-columns:1fr 1fr;padding:16px}
-  .actions{display:flex;justify-content:center}
-  button{padding:13px 20px;font-size:15px}
-}
-@media(max-width:420px){
-  .grid-2{grid-template-columns:1fr}
-  .actions{grid-template-columns:1fr}
-}
-@media print{
-  body{background:white;padding:0}
-  .app{box-shadow:none;border-radius:0}
-  .actions,.note{display:none}
-  input{border:0;background:white}
-}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0d6b5c">
+  <title>خارطة الأحداث والمواقع</title>
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="preconnect" href="https://tile.openstreetmap.org">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIINfQ3ynh0jMZFVnMZz0n0+0nbxQmQKZx4=" crossorigin="">
+  <style>
+    :root {
+      --ink:#172a36; --muted:#687983; --line:#dfe7e5; --surface:#fff;
+      --canvas:#f3f6f5; --green:#0d6b5c; --green-dark:#095448;
+      --green-soft:#e9f4f1; --red:#b44949;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    html,body{min-height:100%;margin:0}
+    body{
+      background:var(--canvas);color:var(--ink);
+      font-family:Tahoma,Arial,"Segoe UI",sans-serif;
+      -webkit-font-smoothing:antialiased
+    }
+    button,textarea,input,select{font:inherit}
+    button{-webkit-tap-highlight-color:transparent}
+    .app{min-height:100vh;min-height:100dvh}
+    .topbar{
+      min-height:76px;padding:13px 22px;display:flex;align-items:center;
+      justify-content:space-between;gap:18px;background:#fff;
+      border-bottom:1px solid var(--line)
+    }
+    .brand,.actions,.panel-head,.row-title,.hint,.primary,.secondary,
+    .share,.export,.status,.data-field,.toast{display:flex;align-items:center}
+    .brand{gap:11px}
+    .logo{
+      width:44px;height:44px;display:grid;place-items:center;border-radius:14px;
+      color:#fff;background:var(--green);font-size:22px;
+      box-shadow:0 8px 22px rgba(13,107,92,.2)
+    }
+    .brand h1{margin:0;font-size:20px}
+    .brand p{margin:4px 0 0;color:var(--muted);font-size:11px}
+    .actions{gap:8px}
+    .status{
+      gap:6px;height:39px;padding:0 12px;color:#52656d;background:#f7faf9;
+      border:1px solid var(--line);border-radius:11px;font-size:11px
+    }
+    .dot{width:8px;height:8px;border-radius:50%;background:#20a482;box-shadow:0 0 0 4px #dff3ec}
+    .reset{
+      width:39px;height:39px;display:grid;place-items:center;color:#5d6e75;
+      background:#fff;border:1px solid var(--line);border-radius:11px;cursor:pointer
+    }
+    .reset:disabled{opacity:.4;cursor:not-allowed}
+    .mobile-nav{display:none}
+    .workspace{
+      height:calc(100vh - 76px);min-height:630px;padding:12px;display:grid;
+      grid-template-columns:310px minmax(420px,1fr) 360px;
+      grid-template-areas:"details map input";gap:12px;direction:ltr
+    }
+    .panel,.map-panel{
+      direction:rtl;min-width:0;background:var(--surface);
+      border:1px solid var(--line);border-radius:17px;
+      box-shadow:0 9px 26px rgba(23,42,54,.04)
+    }
+    .input-panel{grid-area:input;padding:19px;display:flex;flex-direction:column;min-height:0}
+    .details-panel{grid-area:details;padding:19px;display:flex;flex-direction:column;min-height:0}
+    .map-panel{grid-area:map;padding:13px;display:flex;flex-direction:column;min-height:0}
+    .panel-head{justify-content:space-between;gap:10px;margin-bottom:15px}
+    .panel-head h2,.map-title h2{margin:2px 0 0;font-size:17px}
+    .step{display:block;color:var(--green);font-size:10px;font-weight:700}
+    .example{
+      color:var(--green);background:transparent;border:0;padding:6px;
+      font-size:11px;font-weight:700;cursor:pointer
+    }
+    .input-tabs{
+      display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;margin-bottom:14px;
+      background:#f2f6f5;border:1px solid #dfe8e5;border-radius:11px
+    }
+    .input-tab{
+      min-height:35px;color:#64767d;background:transparent;border:0;border-radius:8px;
+      font-size:10px;font-weight:700;cursor:pointer
+    }
+    .input-tab.active{color:var(--green);background:#fff;box-shadow:0 2px 8px rgba(23,42,54,.08)}
+    .input-mode[hidden]{display:none}
+    label{display:block;margin:0 2px 7px;color:#596b73;font-size:11px;font-weight:700}
+    textarea{
+      width:100%;min-height:132px;resize:vertical;padding:12px 13px;color:var(--ink);
+      background:#fbfcfc;border:1px solid #d8e2df;border-radius:12px;
+      outline:none;font-size:12px;line-height:1.8
+    }
+    textarea:focus{background:#fff;border-color:#53a392;box-shadow:0 0 0 3px rgba(13,107,92,.1)}
+    textarea:disabled{opacity:.65}
+    .text-field{
+      width:100%;min-height:40px;padding:0 11px;color:var(--ink);background:#fbfcfc;
+      border:1px solid #d8e2df;border-radius:10px;outline:none;font-size:11px
+    }
+    .text-field:focus,.coord-input:focus,.hemisphere:focus{background:#fff;border-color:#53a392;box-shadow:0 0 0 3px rgba(13,107,92,.09)}
+    .dms-block{margin-top:13px;padding:12px;background:#f8faf9;border:1px solid #e0e8e6;border-radius:12px}
+    .dms-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .dms-heading strong{font-size:10px}.dms-heading span{color:#8a989d;font-size:8.5px}
+    .dms-row+.dms-row{margin-top:11px}
+    .axis-label{display:block;margin-bottom:5px;color:#53666e;font-size:9.5px;font-weight:700}
+    .dms-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) 63px;gap:5px;direction:rtl}
+    .mini-field{margin:0;min-width:0}
+    .mini-field span{display:block;margin:0 2px 4px;color:#859399;font-size:8px;font-weight:400}
+    .coord-input,.hemisphere{
+      width:100%;height:38px;padding:0 7px;color:#30434c;background:#fff;
+      border:1px solid #d8e2df;border-radius:9px;outline:none;text-align:center;font-size:10px
+    }
+    .hemisphere{padding:0 4px;color:var(--green);font-weight:700}
+    .or-divider{display:flex;align-items:center;gap:8px;margin:12px 0;color:#95a2a7;font-size:8px}
+    .or-divider:before,.or-divider:after{content:"";height:1px;flex:1;background:#e2e9e7}
+    .single-hint{margin:7px 2px 11px;color:#849399;font-size:8.5px;line-height:1.6}
+    .hint{align-items:flex-start;gap:6px;margin:9px 2px 12px;color:#7c8c92;font-size:9.5px;line-height:1.6}
+    .primary,.share{
+      width:100%;min-height:44px;justify-content:center;gap:7px;color:#fff;
+      background:var(--green);border:1px solid var(--green);border-radius:11px;
+      font-size:12px;font-weight:700;cursor:pointer;
+      box-shadow:0 8px 18px rgba(13,107,92,.15)
+    }
+    .primary:hover,.share:hover{background:var(--green-dark)}
+    .primary:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+    .events-wrap{
+      flex:1;min-height:0;margin-top:18px;padding-top:15px;
+      display:flex;flex-direction:column;border-top:1px solid #edf1f0
+    }
+    .row-title{justify-content:space-between;margin-bottom:8px}
+    .row-title h3{margin:0;font-size:12px}
+    .count{min-width:25px;padding:3px 7px;text-align:center;color:var(--green);background:var(--green-soft);border-radius:7px;font-size:10px;font-weight:700}
+    .event-list{flex:1;min-height:0;overflow:auto;scrollbar-width:thin}
+    .empty-list{height:100%;min-height:110px;display:grid;place-content:center;gap:6px;text-align:center;color:#98a7ab;font-size:10px}
+    .event-row{
+      width:100%;min-height:58px;display:grid;grid-template-columns:minmax(0,1fr) 28px;
+      align-items:center;gap:4px;padding:7px 8px;border:1px solid transparent;border-radius:11px
+    }
+    .event-row+.event-row{margin-top:4px}
+    .event-row:hover{background:#f8faf9}
+    .event-row.selected{background:#eef7f4;border-color:#cfe4de}
+    .event-select{
+      min-width:0;display:grid;grid-template-columns:29px minmax(0,1fr);align-items:center;
+      gap:8px;padding:0;color:inherit;text-align:right;background:transparent;border:0;cursor:pointer
+    }
+    .event-select:disabled{cursor:default}
+    .event-number{
+      width:27px;height:27px;display:grid;place-items:center;color:#65767d;
+      background:#edf1f1;border-radius:9px;font-size:10px;font-weight:800
+    }
+    .event-number.resolved{color:#fff;background:var(--green)}
+    .event-number.locating{color:var(--green);background:#e1f0ec}
+    .event-number.error{color:#fff;background:var(--red)}
+    .event-copy{min-width:0;display:flex;flex-direction:column;gap:3px}
+    .event-copy strong,.event-copy small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .event-copy strong{font-size:11px}
+    .event-copy small{color:#829096;font-size:9.5px}
+    .delete{
+      width:27px;height:27px;padding:0;display:grid;place-items:center;color:#98a6aa;
+      background:transparent;border:0;border-radius:7px;cursor:pointer;opacity:0
+    }
+    .event-row:hover .delete,.event-row.selected .delete{opacity:1}
+    .delete:hover{color:var(--red);background:#fbeeee}
+    .map-head{min-height:50px;padding:2px 4px 11px;display:flex;align-items:center;justify-content:space-between}
+    .map-stats{display:flex;gap:6px}
+    .map-stats span{padding:5px 8px;color:var(--green);background:var(--green-soft);border-radius:8px;font-size:9.5px;font-weight:700}
+    .map-frame{position:relative;flex:1;min-height:0;overflow:hidden;background:#e9efec;border:1px solid #d7e1df;border-radius:14px}
+    #map{position:absolute;inset:0;z-index:1}
+    .map-empty{
+      position:absolute;z-index:500;top:50%;left:50%;width:min(280px,calc(100% - 36px));
+      padding:18px;transform:translate(-50%,-50%);text-align:center;
+      background:rgba(255,255,255,.94);border:1px solid #d8e2df;border-radius:14px;
+      box-shadow:0 14px 38px rgba(23,42,54,.14);backdrop-filter:blur(8px)
+    }
+    .map-empty .pin{width:44px;height:44px;margin:0 auto 9px;display:grid;place-items:center;color:var(--green);background:var(--green-soft);border-radius:13px;font-size:22px}
+    .map-empty strong{display:block;font-size:13px}
+    .map-empty p{margin:6px 0 0;color:var(--muted);font-size:10px;line-height:1.7}
+    .map-progress{
+      position:absolute;z-index:550;top:13px;right:50%;display:none;align-items:center;gap:7px;
+      padding:9px 12px;transform:translateX(50%);color:#42545d;background:rgba(255,255,255,.96);
+      border:1px solid #d9e4e1;border-radius:10px;box-shadow:0 8px 22px rgba(23,42,54,.12);font-size:10px
+    }
+    .map-progress.show{display:flex}
+    .spinner{display:inline-block;animation:spin .85s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .marker-shell{background:transparent;border:0}
+    .event-marker{
+      width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+      color:#fff;background:var(--green);border:3px solid #fff;border-radius:50% 50% 50% 12px;
+      transform:rotate(-45deg);box-shadow:0 5px 14px rgba(12,66,58,.32);font-size:11px;font-weight:800
+    }
+    .event-marker b{transform:rotate(45deg)}
+    .event-marker.active{width:42px;height:42px;background:#d58a22}
+    .leaflet-tooltip{direction:rtl;padding:6px 9px;border:0;border-radius:8px;font-family:Tahoma,Arial,sans-serif;font-size:10px}
+    .leaflet-control-attribution{font-size:8px!important}
+    .details-empty{flex:1;min-height:270px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#91a0a5}
+    .details-empty .icon{width:54px;height:54px;display:grid;place-items:center;color:var(--green);background:var(--green-soft);border-radius:16px;font-size:25px}
+    .details-empty h3{margin:12px 0 5px;color:#4b5d65;font-size:12px}
+    .details-empty p{max-width:220px;margin:0;font-size:9.5px;line-height:1.7}
+    .details-content{display:none}
+    .selected-card{display:flex;align-items:center;gap:10px;padding:11px;margin-bottom:16px;background:#f3f8f6;border:1px solid #dceae6;border-radius:12px}
+    .selected-card .pin{width:34px;height:34px;display:grid;place-items:center;flex:0 0 auto;color:#fff;background:var(--green);border-radius:10px}
+    .selected-card small{display:block;color:#77888e;font-size:9px}
+    .selected-card strong{display:block;max-width:190px;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
+    .field{margin-bottom:11px}
+    .field label{font-size:10px}
+    .data-field{min-height:40px;justify-content:space-between;padding:0 11px;color:#283c46;background:#fafcfc;border:1px solid #dde6e4;border-radius:10px;font-size:11px}
+    .coordinates{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .coordinate{direction:ltr;justify-content:flex-start;font-family:ui-monospace,Menlo,monospace;font-size:9px}
+    .address{padding:11px;margin-bottom:14px;background:#fafcfc;border:1px dashed #d7e2df;border-radius:10px}
+    .address small{color:#78888f;font-size:9px}
+    .address p{margin:5px 0 0;color:#4d6068;font-size:9.5px;line-height:1.7}
+    .secondary,.export{
+      width:100%;min-height:39px;justify-content:center;gap:7px;margin-top:8px;
+      color:var(--green);background:#fff;border:1px solid #cfe0dc;border-radius:11px;
+      font-size:11px;font-weight:700;cursor:pointer
+    }
+    .panel-footer{margin-top:auto;padding-top:15px;border-top:1px solid #edf1f0}
+    .export{margin:0;color:#53666d;background:#f7faf9;border-color:#dce5e3;font-size:10px}
+    .export:disabled{opacity:.45;cursor:not-allowed}
+    .panel-footer p{margin:9px 2px 0;color:#98a5a9;font-size:8.5px;line-height:1.6}
+    .toast{
+      position:fixed;z-index:2000;right:50%;bottom:22px;gap:6px;padding:11px 16px;
+      transform:translateX(50%);color:#fff;background:#1d353e;border-radius:10px;
+      box-shadow:0 10px 30px rgba(17,42,51,.25);font-size:11px;font-weight:700;
+      opacity:0;pointer-events:none;transition:opacity .2s
+    }
+    .toast.show{opacity:1}
+    @media(max-width:920px){
+      .workspace{height:auto;min-height:0;grid-template-columns:1fr 1fr;grid-template-areas:"input details" "map map"}
+      .input-panel,.details-panel{min-height:600px}
+      .map-panel{min-height:550px}
+    }
+    @media(max-width:680px){
+      .topbar{position:sticky;z-index:1000;top:0;min-height:68px;padding:11px 12px}
+      .brand h1{font-size:17px}.brand p{display:none}
+      .logo{width:40px;height:40px;border-radius:12px}
+      .status{width:38px;height:38px;padding:0;justify-content:center}
+      .status span:not(.dot),.status strong{display:none}
+      .reset{width:38px;height:38px}
+      .mobile-nav{
+        position:sticky;z-index:990;top:68px;display:grid;grid-template-columns:repeat(3,1fr);
+        gap:5px;padding:7px 8px;background:rgba(243,246,245,.96);
+        border-bottom:1px solid var(--line);backdrop-filter:blur(10px)
+      }
+      .mobile-nav a{
+        min-height:39px;display:flex;align-items:center;justify-content:center;gap:5px;
+        color:#53676f;text-decoration:none;background:#fff;border:1px solid #dce5e3;
+        border-radius:10px;font-size:11px;font-weight:700
+      }
+      .workspace{display:flex;flex-direction:column;padding:8px}
+      .input-panel,.details-panel,.map-panel{min-height:auto;border-radius:15px;scroll-margin-top:120px}
+      .input-panel,.details-panel{padding:17px}
+      .input-panel{order:1}.map-panel{order:2;height:500px}.details-panel{order:3;min-height:430px}
+      textarea{min-height:150px;font-size:16px;line-height:1.7}
+      .text-field,.coord-input,.hemisphere{min-height:44px;font-size:16px}
+      .dms-block{padding:11px}.dms-grid{grid-template-columns:repeat(3,minmax(0,1fr)) 70px;gap:6px}
+      .primary,.share{min-height:48px;font-size:13px}
+      .secondary,.export{min-height:44px;font-size:12px}
+      .events-wrap{min-height:180px;max-height:340px}
+      .event-row{min-height:62px}.event-copy strong{font-size:12px}.event-copy small{font-size:10px}
+      .delete{opacity:1}.map-stats{display:none}
+      .data-field{min-height:44px;font-size:13px}.coordinate{font-size:11px}
+      .address p{font-size:11px}
+      .toast{bottom:calc(18px + env(safe-area-inset-bottom));width:max-content;max-width:calc(100vw - 28px);text-align:center}
+    }
+    @media(max-width:420px){
+      .brand{gap:8px}.brand h1{font-size:16px}.logo{width:38px;height:38px}
+      .map-panel{height:465px}.coordinates{grid-template-columns:1fr;gap:0}
+    }
+  </style>
 </head>
-
 <body>
-<div class="app">
-  <section class="hero">
-    <div class="badge">⚓</div>
-    <h1>منصة توزيع القوة البشرية</h1>
-    <p>نموذج مناسب للجوال لمتابعة توزيع الأفراد ومطابقة المجموع المطلوب</p>
-  </section>
-
-  <section class="top">
-    <div class="field">
-      <label>اسم الجهة / القطاع</label>
-      <input id="orgName" type="text" placeholder="اكتب اسم الجهة">
-    </div>
-    <div class="field">
-      <label>التاريخ</label>
-      <input id="reportDate" type="date">
-    </div>
-    <div class="field">
-      <label>المجموع المطلوب</label>
-      <input id="targetTotal" type="number" min="0" value="100">
-    </div>
-  </section>
-
-  <section class="sections" id="sections"></section>
-
-  <div id="resultBox" class="result red">المجموع الحالي: 0 / المطلوب: 100</div>
-
-  <div class="actions">
-    <button onclick="saveData()">حفظ البيانات</button>
-    <button class="gold" onclick="exportText()">نسخ الملخص</button>
-    <button onclick="window.print()">طباعة / PDF</button>
-    <button class="gray" onclick="resetData()">مسح البيانات</button>
-  </div>
-
-  <div class="note">
-    يصبح المجموع باللون الأخضر عند تطابق مجموع الأقسام مع المجموع المطلوب بالضبط، ويظهر بالأحمر عند وجود زيادة أو نقص.
-  </div>
-
-  <div class="footer">ملف HTML يعمل بدون إنترنت وجاهز للمشاركة عبر الجوال.</div>
-</div>
-
-<script>
-const today = new Date().toISOString().slice(0,10);
-const defaultData = {
-  orgName:"",
-  reportDate: today,
-  targetTotal: 100,
-  rows: [
-    {name:"", present:0, license:0, leave:0, hospital:0},
-    {name:"", present:0, license:0, leave:0, hospital:0},
-    {name:"", present:0, license:0, leave:0, hospital:0},
-    {name:"", present:0, license:0, leave:0, hospital:0},
-    {name:"", present:0, license:0, leave:0, hospital:0}
-  ]
-};
-
-let data = JSON.parse(localStorage.getItem("mobileManpowerDistributionApp") || "null") || JSON.parse(JSON.stringify(defaultData));
-
-function num(v){ return Number(v) || 0; }
-
-function escapeHtml(str){
-  return String(str ?? "")
-    .replaceAll("&","&amp;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;");
-}
-
-function buildOnce(){
-  document.getElementById("orgName").value = data.orgName || "";
-  document.getElementById("reportDate").value = data.reportDate || today;
-  document.getElementById("targetTotal").value = data.targetTotal;
-
-  const sections = document.getElementById("sections");
-  sections.innerHTML = "";
-
-  data.rows.forEach((r, i)=>{
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `
-      <div class="card-title">القسم رقم ${i+1}</div>
-      <div class="card-body">
-        <div class="field">
-          <label>اسم القسم</label>
-          <input type="text" placeholder="اكتب اسم القسم" data-row="${i}" data-field="name" value="${escapeHtml(r.name)}">
-        </div>
-        <div class="grid-2">
-          <div class="field">
-            <label>الموجود</label>
-            <input type="number" min="0" data-row="${i}" data-field="present" value="${num(r.present)}">
-          </div>
-          <div class="field">
-            <label>الرخصة</label>
-            <input type="number" min="0" data-row="${i}" data-field="license" value="${num(r.license)}">
-          </div>
-          <div class="field">
-            <label>الإجازة</label>
-            <input type="number" min="0" data-row="${i}" data-field="leave" value="${num(r.leave)}">
-          </div>
-          <div class="field">
-            <label>المستشفى</label>
-            <input type="number" min="0" data-row="${i}" data-field="hospital" value="${num(r.hospital)}">
-          </div>
-        </div>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo" aria-hidden="true">⌖</span>
+        <div><h1>خارطة الأحداث</h1><p>حوّل قائمة الأحداث إلى نقاط وبيانات مواقع جاهزة للإرسال</p></div>
       </div>
-      <div class="total" id="rowTotal${i}">مجموع القسم: 0</div>
-    `;
-    sections.appendChild(card);
-  });
+      <div class="actions">
+        <div class="status"><span class="dot"></span><strong id="headerCount">0</strong><span>موقع محدد</span></div>
+        <button class="reset" id="resetBtn" type="button" title="مسح الكل" aria-label="مسح جميع الأحداث">↻</button>
+      </div>
+    </header>
 
-  document.querySelectorAll("input[data-row]").forEach(input=>{
-    input.addEventListener("input", function(){
-      const row = Number(this.dataset.row);
-      const field = this.dataset.field;
-      data.rows[row][field] = field === "name" ? this.value : num(this.value);
-      updateTotalsOnly();
-    });
-  });
+    <nav class="mobile-nav" aria-label="التنقل داخل الصفحة">
+      <a href="#inputPanel">✎ الإدخال</a>
+      <a href="#mapPanel">● الخريطة</a>
+      <a href="#detailsPanel">↗ البيانات</a>
+    </nav>
 
-  document.getElementById("orgName").addEventListener("input", e => data.orgName = e.target.value);
-  document.getElementById("reportDate").addEventListener("input", e => data.reportDate = e.target.value);
-  document.getElementById("targetTotal").addEventListener("input", e => {
-    data.targetTotal = num(e.target.value);
-    updateTotalsOnly();
-  });
+    <section class="workspace">
+      <aside class="panel input-panel" id="inputPanel">
+        <div class="panel-head">
+          <div><span class="step">الخطوة 1</span><h2>إدخال الأحداث</h2></div>
+          <button class="example" id="exampleBtn" type="button">✦ مثال جاهز</button>
+        </div>
+        <div class="input-tabs" role="tablist" aria-label="طريقة إدخال الأحداث">
+          <button class="input-tab active" id="bulkTab" type="button" role="tab" aria-selected="true" data-mode="bulk">لصق قائمة</button>
+          <button class="input-tab" id="singleTab" type="button" role="tab" aria-selected="false" data-mode="single">إحداثي منفصل</button>
+        </div>
 
-  updateTotalsOnly();
-}
+        <div class="input-mode" id="bulkMode" role="tabpanel">
+          <label for="eventsInput">كل حدث في سطر مستقل</label>
+          <textarea id="eventsInput" spellcheck="false" placeholder="اجتماع الرياض | 24.7136, 46.6753&#10;زيارة جدة | جدة، السعودية"></textarea>
+          <div class="hint"><span>ⓘ</span><span>الصيغة: <b>اسم الحدث | المدينة، الدولة</b> أو <b>اسم الحدث | الإحداثيات</b></span></div>
+          <button class="primary" id="analyzeBtn" type="button">⌖ تحديد الأحداث على الخريطة</button>
+        </div>
 
-function updateTotalsOnly(){
-  let grandTotal = 0;
+        <div class="input-mode" id="singleMode" role="tabpanel" hidden>
+          <label for="singleTitle">اسم الحدث «اختياري»</label>
+          <input class="text-field coordinate-control" id="singleTitle" type="text" placeholder="مثال: موقع الدورية">
 
-  data.rows.forEach((r, i)=>{
-    const total = num(r.present) + num(r.license) + num(r.leave) + num(r.hospital);
-    grandTotal += total;
-    document.getElementById("rowTotal"+i).textContent = "مجموع القسم: " + total;
-  });
+          <div class="dms-block">
+            <div class="dms-heading"><strong>الإحداثي بشكل منفصل</strong><span>درجة · دقيقة · ثانية</span></div>
+            <div class="dms-row">
+              <span class="axis-label">خط العرض — ثلاث خانات</span>
+              <div class="dms-grid">
+                <label class="mini-field"><span>الدرجة °</span><input class="coord-input coordinate-control" id="latDeg" type="number" inputmode="decimal" min="0" max="90" placeholder="24"></label>
+                <label class="mini-field"><span>الدقيقة ′</span><input class="coord-input coordinate-control" id="latMin" type="number" inputmode="decimal" min="0" max="59" placeholder="42"></label>
+                <label class="mini-field"><span>الثانية ″</span><input class="coord-input coordinate-control" id="latSec" type="number" inputmode="decimal" min="0" max="59.999" step="any" placeholder="49"></label>
+                <label class="mini-field"><span>الاتجاه</span><select class="hemisphere coordinate-control" id="latHem"><option value="N">شمال N</option><option value="S">جنوب S</option></select></label>
+              </div>
+            </div>
+            <div class="dms-row">
+              <span class="axis-label">خط الطول — ثلاث خانات</span>
+              <div class="dms-grid">
+                <label class="mini-field"><span>الدرجة °</span><input class="coord-input coordinate-control" id="lngDeg" type="number" inputmode="decimal" min="0" max="180" placeholder="46"></label>
+                <label class="mini-field"><span>الدقيقة ′</span><input class="coord-input coordinate-control" id="lngMin" type="number" inputmode="decimal" min="0" max="59" placeholder="40"></label>
+                <label class="mini-field"><span>الثانية ″</span><input class="coord-input coordinate-control" id="lngSec" type="number" inputmode="decimal" min="0" max="59.999" step="any" placeholder="31"></label>
+                <label class="mini-field"><span>الاتجاه</span><select class="hemisphere coordinate-control" id="lngHem"><option value="E">شرق E</option><option value="W">غرب W</option></select></label>
+              </div>
+            </div>
+          </div>
 
-  const target = num(data.targetTotal);
-  const resultBox = document.getElementById("resultBox");
-  resultBox.className = "result " + (grandTotal === target ? "green" : "red");
+          <div class="or-divider">أو</div>
+          <label for="coordinatePaste">لصق الإحداثي كاملًا</label>
+          <input class="text-field coordinate-control" id="coordinatePaste" type="text" inputmode="text" dir="ltr" placeholder="24.7136, 46.6753">
+          <p class="single-hint">يمكن لصق الإحداثي العشري أو بصيغة الدرجة والدقيقة والثانية. عند تعبئة خانة اللصق سيتم اعتمادها أولًا.</p>
+          <button class="primary" id="addCoordinateBtn" type="button">＋ إضافة وتحديد الموقع</button>
+        </div>
+        <div class="events-wrap">
+          <div class="row-title"><h3>الأحداث</h3><span class="count" id="eventCount">0</span></div>
+          <div class="event-list" id="eventList">
+            <div class="empty-list"><span>⌖</span><span>ستظهر الأحداث هنا بعد تحليل القائمة</span></div>
+          </div>
+        </div>
+      </aside>
 
-  if(grandTotal === target){
-    resultBox.textContent = `المجموع الحالي: ${grandTotal} / المطلوب: ${target} — التوزيع صحيح`;
-  }else if(grandTotal > target){
-    resultBox.textContent = `المجموع الحالي: ${grandTotal} / المطلوب: ${target} — يوجد زيادة ${grandTotal - target}`;
-  }else{
-    resultBox.textContent = `المجموع الحالي: ${grandTotal} / المطلوب: ${target} — يوجد نقص ${target - grandTotal}`;
-  }
-}
+      <section class="map-panel" id="mapPanel" aria-label="خريطة الأحداث">
+        <div class="map-head">
+          <div class="map-title"><span class="step">الخطوة 2</span><h2>مواقع الأحداث</h2></div>
+          <div class="map-stats"><span id="resolvedStat">✓ 0 مكتمل</span><span id="errorStat" hidden>! 0 تعذر</span></div>
+        </div>
+        <div class="map-frame">
+          <div id="map"></div>
+          <div class="map-empty" id="mapEmpty"><div class="pin">⌖</div><strong>الخريطة جاهزة</strong><p>ألصق الأحداث واضغط تحديد المواقع لتظهر العلامات هنا.</p></div>
+          <div class="map-progress" id="mapProgress"><span class="spinner">◌</span><span>جارٍ تحديد المواقع…</span><strong id="progressText">0/0</strong></div>
+        </div>
+      </section>
 
-function saveData(){
-  localStorage.setItem("mobileManpowerDistributionApp", JSON.stringify(data));
-  alert("تم حفظ البيانات بنجاح");
-}
+      <aside class="panel details-panel" id="detailsPanel">
+        <div class="panel-head"><div><span class="step">الخطوة 3</span><h2>بيانات الموقع</h2></div></div>
+        <div class="details-empty" id="detailsEmpty">
+          <div class="icon">↗</div><h3>اختر حدثًا من الخريطة</h3>
+          <p>بعد تحديد المواقع، اختر علامة لعرض الدولة والمدينة والإحداثيات.</p>
+        </div>
+        <div class="details-content" id="detailsContent">
+          <div class="selected-card"><span class="pin">⌖</span><div><small>الحدث المحدد</small><strong id="selectedTitle">—</strong></div></div>
+          <div class="field"><label>الدولة</label><div class="data-field"><span id="countryValue">—</span><span>✓</span></div></div>
+          <div class="field"><label>المدينة</label><div class="data-field"><span id="cityValue">—</span><span>✓</span></div></div>
+          <div class="coordinates">
+            <div class="field"><label>خط العرض</label><div class="data-field coordinate" id="latValue">—</div></div>
+            <div class="field"><label>خط الطول</label><div class="data-field coordinate" id="lngValue">—</div></div>
+          </div>
+          <div class="address"><small>العنوان التقريبي</small><p id="addressValue">—</p></div>
+          <button class="share" id="shareBtn" type="button">↗ إرسال بيانات الموقع</button>
+          <button class="secondary" id="copyBtn" type="button">▣ نسخ البيانات</button>
+        </div>
+        <div class="panel-footer">
+          <button class="export" id="exportBtn" type="button" disabled>⇩ تصدير جميع المواقع CSV</button>
+          <p>تُحفظ الأحداث على هذا الجهاز. يُرسل نص المكان فقط إلى OpenStreetMap لتحديده.</p>
+        </div>
+      </aside>
+    </section>
+    <div class="toast" id="toast" role="status">✓ <span id="toastText"></span></div>
+  </main>
 
-function resetData(){
-  if(confirm("هل تريد مسح جميع البيانات؟")){
-    data = JSON.parse(JSON.stringify(defaultData));
-    localStorage.removeItem("mobileManpowerDistributionApp");
-    buildOnce();
-  }
-}
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+    (function () {
+      "use strict";
+      var MAX_EVENTS = 25;
+      var STORAGE_KEY = "event-location-map-html:v1";
+      var example = "اجتماع الرياض | 24.7136, 46.6753\nزيارة جدة | جدة، السعودية\nجولة أبها | أبها، السعودية";
+      var events = [];
+      var selectedId = null;
+      var processing = false;
+      var markers = {};
+      var markerLayer;
+      var fittedKey = "";
+      var toastTimer;
 
-function exportText(){
-  let grandTotal = 0;
-  let text = "ملخص توزيع القوة البشرية\n";
-  text += "الجهة: " + (data.orgName || "-") + "\n";
-  text += "التاريخ: " + (data.reportDate || "-") + "\n";
-  text += "المجموع المطلوب: " + data.targetTotal + "\n\n";
+      var input = document.getElementById("eventsInput");
+      var analyzeBtn = document.getElementById("analyzeBtn");
+      var resetBtn = document.getElementById("resetBtn");
+      var eventList = document.getElementById("eventList");
+      var mapEmpty = document.getElementById("mapEmpty");
+      var mapProgress = document.getElementById("mapProgress");
+      var detailsEmpty = document.getElementById("detailsEmpty");
+      var detailsContent = document.getElementById("detailsContent");
+      var exportBtn = document.getElementById("exportBtn");
+      var bulkMode = document.getElementById("bulkMode");
+      var singleMode = document.getElementById("singleMode");
+      var addCoordinateBtn = document.getElementById("addCoordinateBtn");
+      var coordinatePaste = document.getElementById("coordinatePaste");
+      var singleTitle = document.getElementById("singleTitle");
+      var coordinateControls = Array.prototype.slice.call(document.querySelectorAll(".coordinate-control"));
 
-  data.rows.forEach((r, i)=>{
-    const total = num(r.present) + num(r.license) + num(r.leave) + num(r.hospital);
-    grandTotal += total;
-    text += `${i+1}) ${r.name || "قسم بدون اسم"}: الموجود ${num(r.present)} | الرخصة ${num(r.license)} | الإجازة ${num(r.leave)} | المستشفى ${num(r.hospital)} | المجموع ${total}\n`;
-  });
+      var map = L.map("map", { zoomControl:false }).setView([23.8859,45.0792],5);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom:19,
+        attribution:"&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a>"
+      }).addTo(map);
+      L.control.zoom({position:"bottomleft"}).addTo(map);
+      markerLayer = L.layerGroup().addTo(map);
+      setTimeout(function(){ map.invalidateSize(); },120);
+      window.addEventListener("resize",function(){ map.invalidateSize(); });
 
-  text += "\nالمجموع الحالي: " + grandTotal;
+      function id(){
+        return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : Date.now()+"-"+Math.random().toString(16).slice(2);
+      }
+      function digits(value){
+        var ar="٠١٢٣٤٥٦٧٨٩", fa="۰۱۲۳۴۵۶۷۸۹";
+        return value.replace(/[٠-٩]/g,function(d){return String(ar.indexOf(d));})
+          .replace(/[۰-۹]/g,function(d){return String(fa.indexOf(d));})
+          .replace(/٫/g,".");
+      }
+      function setInputMode(mode){
+        var single=mode==="single";
+        bulkMode.hidden=single;singleMode.hidden=!single;
+        document.getElementById("bulkTab").classList.toggle("active",!single);
+        document.getElementById("singleTab").classList.toggle("active",single);
+        document.getElementById("bulkTab").setAttribute("aria-selected",String(!single));
+        document.getElementById("singleTab").setAttribute("aria-selected",String(single));
+      }
+      function setBusy(value){
+        processing=value;input.disabled=value;analyzeBtn.disabled=value;resetBtn.disabled=value;
+        addCoordinateBtn.disabled=value;
+        coordinateControls.forEach(function(control){control.disabled=value;});
+        document.querySelectorAll(".input-tab").forEach(function(tab){tab.disabled=value;});
+        mapProgress.classList.toggle("show",value);
+      }
+      function dmsToDecimal(degrees,minutes,seconds,hemisphere){
+        var value=Math.abs(degrees)+(minutes/60)+(seconds/3600);
+        if(degrees<0||hemisphere==="S"||hemisphere==="W")value*=-1;
+        return value;
+      }
+      function validateCoordinates(latitude,longitude){
+        if(!isFinite(latitude)||!isFinite(longitude)||Math.abs(latitude)>90||Math.abs(longitude)>180){
+          throw new Error("الإحداثي خارج النطاق الصحيح");
+        }
+        return {latitude:latitude,longitude:longitude};
+      }
+      function parseCoordinateText(value){
+        var normalized=digits(value).trim().replace(/،/g,",");
+        var numbers=(normalized.match(/-?\d+(?:\.\d+)?/g)||[]).map(Number);
+        if(numbers.length===2)return validateCoordinates(numbers[0],numbers[1]);
+        if(numbers.length>=6){
+          var latMinutes=numbers[1],latSeconds=numbers[2],lngMinutes=numbers[4],lngSeconds=numbers[5];
+          if(latMinutes<0||latMinutes>=60||latSeconds<0||latSeconds>=60||lngMinutes<0||lngMinutes>=60||lngSeconds<0||lngSeconds>=60){
+            throw new Error("الدقائق والثواني يجب أن تكون أقل من 60");
+          }
+          var latHem=/\bS\b|جنوب/i.test(normalized)?"S":"N";
+          var lngHem=/\bW\b|غرب/i.test(normalized)?"W":"E";
+          return validateCoordinates(
+            dmsToDecimal(numbers[0],latMinutes,latSeconds,latHem),
+            dmsToDecimal(numbers[3],lngMinutes,lngSeconds,lngHem)
+          );
+        }
+        throw new Error("صيغة الإحداثي غير واضحة");
+      }
+      function readDmsFields(){
+        var ids=["latDeg","latMin","latSec","lngDeg","lngMin","lngSec"];
+        var values=ids.map(function(fieldId){return document.getElementById(fieldId).value.trim();});
+        if(values.some(function(value){return value==="";}))throw new Error("أكمل المربعات الثلاثة لخط العرض والثلاثة لخط الطول");
+        var numbers=values.map(function(value){return Number(digits(value));});
+        if(numbers.some(function(value){return !isFinite(value);}))throw new Error("أدخل أرقامًا صحيحة في خانات الإحداثي");
+        if(numbers[1]<0||numbers[1]>=60||numbers[2]<0||numbers[2]>=60||numbers[4]<0||numbers[4]>=60||numbers[5]<0||numbers[5]>=60){
+          throw new Error("الدقائق والثواني يجب أن تكون من 0 إلى أقل من 60");
+        }
+        return validateCoordinates(
+          dmsToDecimal(numbers[0],numbers[1],numbers[2],document.getElementById("latHem").value),
+          dmsToDecimal(numbers[3],numbers[4],numbers[5],document.getElementById("lngHem").value)
+        );
+      }
+      function clearSingleFields(){
+        ["singleTitle","coordinatePaste","latDeg","latMin","latSec","lngDeg","lngMin","lngSec"].forEach(function(fieldId){document.getElementById(fieldId).value="";});
+        document.getElementById("latHem").value="N";document.getElementById("lngHem").value="E";
+      }
+      function parseLine(raw,index){
+        var source=raw.trim();
+        if(!source)return null;
+        var normalized=digits(source);
+        var match=normalized.match(/(-?\d{1,2}(?:\.\d+)?)\s*[,،]\s*(-?\d{1,3}(?:\.\d+)?)/);
+        if(match){
+          var lat=Number(match[1]),lng=Number(match[2]);
+          if(isFinite(lat)&&isFinite(lng)&&Math.abs(lat)<=90&&Math.abs(lng)<=180){
+            var prefix=source.slice(0,match.index).replace(/[|،,;:\-–—\s]+$/g,"").trim();
+            return {title:prefix||"حدث "+(index+1),source:source,query:lat+", "+lng,coordinates:{latitude:lat,longitude:lng}};
+          }
+        }
+        var parts=source.split(/[|\t]/).map(function(v){return v.trim();}).filter(Boolean);
+        if(parts.length>=2)return {title:parts[0],source:source,query:parts.slice(1).join("، ")};
+        parts=source.split(/\s+(?:-|–|—)\s+/).map(function(v){return v.trim();}).filter(Boolean);
+        if(parts.length>=2)return {title:parts[0],source:source,query:parts.slice(1).join("، ")};
+        return {title:source,source:source,query:source};
+      }
+      function placeDetails(address){
+        return {
+          city:address.city||address.town||address.village||address.municipality||address.county||address.state_district||address.state||"غير محددة",
+          country:address.country||"غير محددة"
+        };
+      }
+      async function getJson(url){
+        var response=await fetch(url,{headers:{"Accept":"application/json","Accept-Language":"ar"}});
+        if(!response.ok)throw new Error("تعذر الاتصال بخدمة تحديد المواقع");
+        return response.json();
+      }
+      async function reverse(lat,lng){
+        var url="https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&accept-language=ar&lat="+encodeURIComponent(lat)+"&lon="+encodeURIComponent(lng);
+        var data=await getJson(url),details=placeDetails(data.address||{});
+        return {latitude:lat,longitude:lng,city:details.city,country:details.country,address:data.display_name||lat+", "+lng};
+      }
+      async function search(query){
+        var url="https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&accept-language=ar&limit=1&q="+encodeURIComponent(query);
+        var data=await getJson(url);
+        if(!data.length)throw new Error("لم يتم العثور على هذا الموقع");
+        var match=data[0],details=placeDetails(match.address||{});
+        return {latitude:Number(match.lat),longitude:Number(match.lon),city:details.city,country:details.country,address:match.display_name||query};
+      }
+      function wait(ms){return new Promise(function(resolve){setTimeout(resolve,ms);});}
+      function format(number){return typeof number==="number"?number.toFixed(6):"—";}
+      function notice(message){
+        clearTimeout(toastTimer);
+        document.getElementById("toastText").textContent=message;
+        document.getElementById("toast").classList.add("show");
+        toastTimer=setTimeout(function(){document.getElementById("toast").classList.remove("show");},2700);
+      }
+      function save(){
+        try{localStorage.setItem(STORAGE_KEY,JSON.stringify({input:input.value,events:events}));}catch(e){}
+      }
+      function escapeHtml(value){
+        return String(value).replace(/[&<>"']/g,function(ch){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[ch];});
+      }
+      function resolved(){return events.filter(function(e){return e.status==="resolved";});}
+      function render(){
+        var ready=resolved(),errors=events.filter(function(e){return e.status==="error";}).length;
+        document.getElementById("headerCount").textContent=ready.length;
+        document.getElementById("eventCount").textContent=events.length;
+        document.getElementById("resolvedStat").textContent="✓ "+ready.length+" مكتمل";
+        document.getElementById("errorStat").hidden=!errors;
+        document.getElementById("errorStat").textContent="! "+errors+" تعذر";
+        exportBtn.disabled=!ready.length;
+        mapEmpty.style.display=ready.length||processing?"none":"block";
+        if(!events.length){
+          eventList.innerHTML='<div class="empty-list"><span>⌖</span><span>ستظهر الأحداث هنا بعد تحليل القائمة</span></div>';
+        }else{
+          eventList.innerHTML=events.map(function(e,index){
+            var sub=e.status==="resolved"?(e.city+"، "+e.country):e.status==="error"?e.error:e.status==="locating"?"جارٍ البحث عن الموقع…":"في قائمة الانتظار";
+            var symbol=e.status==="resolved"?"✓":e.status==="error"?"!":e.status==="locating"?"◌":String(index+1);
+            return '<div class="event-row '+(selectedId===e.id?'selected':'')+'">'+
+              '<button class="event-select" type="button" data-select="'+escapeHtml(e.id)+'" '+(e.status==="resolved"?"":"disabled")+'>'+
+              '<span class="event-number '+e.status+'">'+(e.status==="locating"?'<span class="spinner">'+symbol+'</span>':symbol)+'</span>'+
+              '<span class="event-copy"><strong>'+escapeHtml(e.title)+'</strong><small>'+escapeHtml(sub||"")+'</small></span></button>'+
+              '<button class="delete" type="button" data-delete="'+escapeHtml(e.id)+'" aria-label="حذف">×</button></div>';
+          }).join("");
+        }
+        eventList.querySelectorAll("[data-select]").forEach(function(button){
+          button.addEventListener("click",function(){selectEvent(button.getAttribute("data-select"));});
+        });
+        eventList.querySelectorAll("[data-delete]").forEach(function(button){
+          button.addEventListener("click",function(){deleteEvent(button.getAttribute("data-delete"));});
+        });
+        renderMarkers();
+        renderDetails();
+        save();
+      }
+      function renderMarkers(){
+        markerLayer.clearLayers();markers={};
+        var ready=resolved();
+        ready.forEach(function(e,index){
+          var active=e.id===selectedId;
+          var icon=L.divIcon({
+            className:"marker-shell",
+            html:'<span class="event-marker '+(active?"active":"")+'"><b>'+(index+1)+'</b></span>',
+            iconSize:active?[42,42]:[36,36],iconAnchor:active?[21,39]:[18,33]
+          });
+          var marker=L.marker([e.latitude,e.longitude],{icon:icon,zIndexOffset:active?1000:0}).addTo(markerLayer);
+          marker.bindTooltip(escapeHtml(e.title),{direction:"top",offset:[0,-28]});
+          marker.on("click",function(){selectEvent(e.id);});
+          markers[e.id]=marker;
+        });
+        var key=ready.map(function(e){return e.id+":"+e.latitude+":"+e.longitude;}).join("|");
+        if(ready.length&&key!==fittedKey){
+          fittedKey=key;
+          var bounds=L.latLngBounds(ready.map(function(e){return [e.latitude,e.longitude];}));
+          if(ready.length===1)map.setView(bounds.getCenter(),12);
+          else map.fitBounds(bounds,{padding:[45,45],maxZoom:12});
+        }
+      }
+      function renderDetails(){
+        var event=events.find(function(e){return e.id===selectedId&&e.status==="resolved";});
+        detailsEmpty.style.display=event?"none":"flex";
+        detailsContent.style.display=event?"block":"none";
+        if(!event)return;
+        document.getElementById("selectedTitle").textContent=event.title;
+        document.getElementById("countryValue").textContent=event.country;
+        document.getElementById("cityValue").textContent=event.city;
+        document.getElementById("latValue").textContent=format(event.latitude);
+        document.getElementById("lngValue").textContent=format(event.longitude);
+        document.getElementById("addressValue").textContent=event.address;
+      }
+      function selectEvent(eventId){
+        selectedId=eventId;render();
+        var event=events.find(function(e){return e.id===eventId;});
+        if(event)map.flyTo([event.latitude,event.longitude],Math.max(map.getZoom(),9),{duration:.65});
+      }
+      function deleteEvent(eventId){
+        events=events.filter(function(e){return e.id!==eventId;});
+        if(selectedId===eventId)selectedId=null;
+        fittedKey="";render();
+      }
+      async function addSingleCoordinate(){
+        if(processing)return;
+        if(events.length>=MAX_EVENTS){notice("الحد الأقصى "+MAX_EVENTS+" حدثًا");return;}
+        var coordinates;
+        try{
+          coordinates=coordinatePaste.value.trim()?parseCoordinateText(coordinatePaste.value):readDmsFields();
+        }catch(error){notice(error&&error.message?error.message:"تحقق من الإحداثي");return;}
 
-  navigator.clipboard.writeText(text).then(()=>alert("تم نسخ الملخص")).catch(()=>alert(text));
-}
-
-buildOnce();
-</script>
+        var title=singleTitle.value.trim()||"موقع "+(events.length+1);
+        var event={
+          id:id(),title:title,source:title+" | "+format(coordinates.latitude)+", "+format(coordinates.longitude),
+          query:coordinates.latitude+", "+coordinates.longitude,status:"locating",
+          latitude:coordinates.latitude,longitude:coordinates.longitude
+        };
+        events.push(event);selectedId=event.id;fittedKey="";
+        document.getElementById("progressText").textContent="0/1";
+        setBusy(true);render();
+        try{
+          var result=await reverse(coordinates.latitude,coordinates.longitude);
+          Object.assign(event,result,{status:"resolved",error:null});
+          clearSingleFields();
+          notice("تمت إضافة الإحداثي إلى الخريطة");
+        }catch(error){
+          event.status="error";event.error=error&&error.message?error.message:"تعذر تحديد الموقع";
+          notice(event.error);
+        }
+        document.getElementById("progressText").textContent="1/1";
+        setBusy(false);render();
+      }
+      async function analyze(){
+        var parsed=input.value.split(/\r?\n/).map(parseLine).filter(Boolean);
+        if(!parsed.length){notice("ألصق حدثًا واحدًا على الأقل أولًا");return;}
+        if(parsed.length>MAX_EVENTS){notice("الحد الأقصى "+MAX_EVENTS+" حدثًا في كل مرة");return;}
+        events=parsed.map(function(line){return {id:id(),title:line.title,source:line.source,query:line.query,status:"pending",latitude:line.coordinates&&line.coordinates.latitude,longitude:line.coordinates&&line.coordinates.longitude};});
+        selectedId=null;fittedKey="";
+        setBusy(true);
+        render();
+        var selected=false;
+        for(var i=0;i<events.length;i++){
+          var current=events[i],line=parsed[i];
+          current.status="locating";document.getElementById("progressText").textContent=i+"/"+events.length;
+          render();
+          try{
+            var result=line.coordinates?await reverse(line.coordinates.latitude,line.coordinates.longitude):await search(line.query);
+            Object.assign(current,result,{status:"resolved",error:null});
+            if(!selected){selected=true;selectedId=current.id;}
+          }catch(error){
+            current.status="error";current.error=error&&error.message?error.message:"تعذر تحديد الموقع";
+          }
+          document.getElementById("progressText").textContent=(i+1)+"/"+events.length;
+          render();
+          if(i<events.length-1)await wait(1050);
+        }
+        setBusy(false);
+        render();notice("اكتمل تحديد مواقع الأحداث");
+      }
+      function message(event){
+        var url="https://www.openstreetmap.org/?mlat="+event.latitude+"&mlon="+event.longitude+"#map=14/"+event.latitude+"/"+event.longitude;
+        return ["الحدث: "+event.title,"الدولة: "+event.country,"المدينة: "+event.city,"الإحداثيات: "+format(event.latitude)+", "+format(event.longitude),"رابط الموقع: "+url].join("\n");
+      }
+      async function copyText(text){
+        try{await navigator.clipboard.writeText(text);return true;}catch(e){}
+        var helper=document.createElement("textarea");
+        helper.value=text;helper.style.position="fixed";helper.style.opacity="0";
+        document.body.appendChild(helper);helper.focus();helper.select();
+        var ok=document.execCommand("copy");helper.remove();return ok;
+      }
+      async function copySelected(){
+        var event=events.find(function(e){return e.id===selectedId;});if(!event)return;
+        notice(await copyText(message(event))?"تم نسخ بيانات الموقع":"تعذر النسخ تلقائيًا");
+      }
+      async function shareSelected(){
+        var event=events.find(function(e){return e.id===selectedId;});if(!event)return;
+        var text=message(event);
+        if(navigator.share){
+          try{await navigator.share({title:event.title,text:text});}catch(e){}
+        }else{
+          notice(await copyText(text)?"تم نسخ البيانات؛ ألصقها في التطبيق المطلوب":"تعذر فتح المشاركة");
+        }
+      }
+      function csvCell(value){return '"'+String(value==null?"":value).replace(/"/g,'""')+'"';}
+      function exportCsv(){
+        var ready=resolved();if(!ready.length){notice("لا توجد مواقع جاهزة للتصدير");return;}
+        var rows=[["الحدث","الدولة","المدينة","خط العرض","خط الطول","العنوان"]].concat(ready.map(function(e){return [e.title,e.country,e.city,e.latitude,e.longitude,e.address];}));
+        var csv="\uFEFF"+rows.map(function(row){return row.map(csvCell).join(",");}).join("\n");
+        var url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+        var a=document.createElement("a");a.href=url;a.download="بيانات-مواقع-الأحداث.csv";a.click();URL.revokeObjectURL(url);
+      }
+      function reset(){
+        if(processing)return;
+        input.value="";clearSingleFields();events=[];selectedId=null;fittedKey="";
+        try{localStorage.removeItem(STORAGE_KEY);}catch(e){}
+        map.setView([23.8859,45.0792],5);render();notice("تم مسح الأحداث");
+      }
+      document.querySelectorAll(".input-tab").forEach(function(tab){tab.addEventListener("click",function(){setInputMode(tab.getAttribute("data-mode"));});});
+      document.getElementById("exampleBtn").addEventListener("click",function(){setInputMode("bulk");input.value=example;save();});
+      analyzeBtn.addEventListener("click",analyze);
+      addCoordinateBtn.addEventListener("click",addSingleCoordinate);
+      resetBtn.addEventListener("click",reset);
+      document.getElementById("copyBtn").addEventListener("click",copySelected);
+      document.getElementById("shareBtn").addEventListener("click",shareSelected);
+      exportBtn.addEventListener("click",exportCsv);
+      input.addEventListener("input",save);
+      document.querySelectorAll(".mobile-nav a").forEach(function(link){
+        link.addEventListener("click",function(){setTimeout(function(){map.invalidateSize();},220);});
+      });
+      try{
+        var stored=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");
+        if(stored){input.value=stored.input||"";events=stored.events||[];var first=events.find(function(e){return e.status==="resolved";});selectedId=first?first.id:null;}
+      }catch(e){try{localStorage.removeItem(STORAGE_KEY);}catch(ignore){}}
+      render();
+    })();
+  </script>
 </body>
 </html>
-'''
-
-path = Path("/mnt/data/mobile_manpower_distribution_app.html")
-path.write_text(html, encoding="utf-8")
-path.as_posix()
