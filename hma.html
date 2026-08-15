@@ -8,8 +8,35 @@
   <link rel="preconnect" href="https://unpkg.com">
   <link rel="preconnect" href="https://tile.openstreetmap.org">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIINfQ3ynh0jMZFVnMZz0n0+0nbxQmQKZx4=" crossorigin="">
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <style>
+    /* Critical Leaflet layout fallback: keeps tiles aligned if the CDN stylesheet is delayed. */
+    .leaflet-pane,.leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow,
+    .leaflet-tile-container,.leaflet-pane>svg,.leaflet-pane>canvas,
+    .leaflet-zoom-box,.leaflet-image-layer,.leaflet-layer{
+      position:absolute;left:0;top:0
+    }
+    .leaflet-container{overflow:hidden;-webkit-tap-highlight-color:transparent}
+    .leaflet-container .leaflet-marker-pane img,
+    .leaflet-container .leaflet-shadow-pane img,
+    .leaflet-container .leaflet-tile-pane img,
+    .leaflet-container img.leaflet-image-layer,
+    .leaflet-container .leaflet-tile{
+      max-width:none!important;max-height:none!important;width:auto;padding:0
+    }
+    .leaflet-tile{visibility:hidden}
+    .leaflet-tile-loaded{visibility:inherit}
+    .leaflet-pane{z-index:400}.leaflet-tile-pane{z-index:200}
+    .leaflet-overlay-pane{z-index:400}.leaflet-shadow-pane{z-index:500}
+    .leaflet-marker-pane{z-index:600}.leaflet-tooltip-pane{z-index:650}
+    .leaflet-popup-pane{z-index:700}
+    .leaflet-control{position:relative;z-index:800;pointer-events:auto}
+    .leaflet-top,.leaflet-bottom{position:absolute;z-index:1000;pointer-events:none}
+    .leaflet-top{top:0}.leaflet-right{right:0}.leaflet-bottom{bottom:0}.leaflet-left{left:0}
+    .leaflet-control{float:left;clear:both}.leaflet-right .leaflet-control{float:right}
+    .leaflet-top .leaflet-control{margin-top:10px}.leaflet-bottom .leaflet-control{margin-bottom:10px}
+    .leaflet-left .leaflet-control{margin-left:10px}.leaflet-right .leaflet-control{margin-right:10px}
+
     :root {
       --ink:#172a36; --muted:#687983; --line:#dfe7e5; --surface:#fff;
       --canvas:#f3f6f5; --green:#0d6b5c; --green-dark:#095448;
@@ -42,6 +69,14 @@
     .brand h1{margin:0;font-size:20px}
     .brand p{margin:4px 0 0;color:var(--muted);font-size:11px}
     .actions{gap:8px}
+    .ship-tracking{
+      height:39px;display:flex;align-items:center;justify-content:center;gap:7px;
+      padding:0 13px;color:#fff;background:#116b82;border:1px solid #116b82;
+      border-radius:11px;text-decoration:none;white-space:nowrap;font-size:11px;font-weight:700;
+      box-shadow:0 7px 18px rgba(17,107,130,.16)
+    }
+    .ship-tracking:hover{background:#0d586b;border-color:#0d586b}
+    .ship-tracking:focus-visible{outline:3px solid rgba(17,107,130,.2);outline-offset:2px}
     .status{
       gap:6px;height:39px;padding:0 12px;color:#52656d;background:#f7faf9;
       border:1px solid var(--line);border-radius:11px;font-size:11px
@@ -176,6 +211,13 @@
     .style-auto .map-style-icon{color:#217968;background:linear-gradient(145deg,#d9f3eb,#c8e9f3)}
     .style-satellite .map-style-icon{color:#f2f5f4;background:linear-gradient(145deg,#344b49,#718079)}
     .style-terrain .map-style-icon{color:#53634f;background:linear-gradient(145deg,#d8ddd0,#aeb9a5)}
+    .ship-map-link{
+      min-height:42px;display:flex;align-items:center;justify-content:center;gap:8px;
+      margin:0 0 10px;color:#0d6073;background:#eef7f8;border:1px solid #cce2e7;
+      border-radius:11px;text-decoration:none;font-size:11px;font-weight:800
+    }
+    .ship-map-link:hover{color:#fff;background:#116b82;border-color:#116b82}
+    .ship-map-link:focus-visible{outline:3px solid rgba(17,107,130,.2);outline-offset:2px}
     .map-frame{position:relative;flex:1;min-height:0;overflow:hidden;direction:ltr;background:#e9efec;border:1px solid #d7e1df;border-radius:14px}
     #map{position:absolute;inset:0;z-index:1;width:100%;height:100%;direction:ltr}
     .map-empty{
@@ -250,8 +292,9 @@
       .status{width:38px;height:38px;padding:0;justify-content:center}
       .status span:not(.dot),.status strong{display:none}
       .reset{width:38px;height:38px}
+      .ship-tracking{display:none}
       .mobile-nav{
-        position:sticky;z-index:990;top:68px;display:grid;grid-template-columns:repeat(3,1fr);
+        position:sticky;z-index:990;top:68px;display:grid;grid-template-columns:repeat(4,1fr);
         gap:5px;padding:7px 8px;background:rgba(243,246,245,.96);
         border-bottom:1px solid var(--line);backdrop-filter:blur(10px)
       }
@@ -293,6 +336,9 @@
         <div><h1>خارطة الأحداث</h1><p>حوّل قائمة الأحداث إلى نقاط وبيانات مواقع جاهزة للإرسال</p></div>
       </div>
       <div class="actions">
+        <a class="ship-tracking" href="https://www.vesselfinder.com/" target="_blank" rel="noopener noreferrer" aria-label="فتح خريطة تتبع السفن المباشر">
+          <span aria-hidden="true">⚓</span><span>تتبع السفن مباشرًا</span>
+        </a>
         <div class="status"><span class="dot"></span><strong id="headerCount">0</strong><span>موقع محدد</span></div>
         <button class="reset" id="resetBtn" type="button" title="مسح الكل" aria-label="مسح جميع الأحداث">↻</button>
       </div>
@@ -302,6 +348,7 @@
       <a href="#inputPanel">✎ الإدخال</a>
       <a href="#mapPanel">● الخريطة</a>
       <a href="#detailsPanel">↗ البيانات</a>
+      <a href="https://www.vesselfinder.com/" target="_blank" rel="noopener noreferrer" aria-label="فتح خريطة تتبع السفن المباشر">⚓ السفن</a>
     </nav>
 
     <section class="workspace">
@@ -372,6 +419,7 @@
           <button class="map-style-button style-satellite" type="button" data-map-style="satellite" aria-pressed="false"><span class="map-style-icon">◫</span><span>القمر الصناعي</span></button>
           <button class="map-style-button style-terrain" type="button" data-map-style="terrain" aria-pressed="false"><span class="map-style-icon">△</span><span>التضاريس</span></button>
         </div>
+        <a class="ship-map-link" href="https://www.vesselfinder.com/" target="_blank" rel="noopener noreferrer" aria-label="فتح خريطة تتبع السفن المباشر">⚓ فتح تتبع السفن المباشر</a>
         <div class="map-frame">
           <div id="map"></div>
           <div class="map-empty" id="mapEmpty"><div class="pin">⌖</div><strong>الخريطة جاهزة</strong><p>ألصق الأحداث واضغط تحديد المواقع لتظهر العلامات هنا.</p></div>
@@ -724,7 +772,7 @@
         };
         events.push(event);selectedId=event.id;fittedKey="";
         document.getElementById("progressText").textContent="0/1";
-        setBusy(true);render();
+        setBusy(true);render();refreshMapSizeRepeatedly();
         try{
           var result=await reverse(coordinates.latitude,coordinates.longitude);
           Object.assign(event,result,{status:"resolved",error:null});
@@ -819,6 +867,9 @@
       document.getElementById("exampleBtn").addEventListener("click",function(){setInputMode("bulk");input.value=example;save();});
       analyzeBtn.addEventListener("click",analyze);
       addCoordinateBtn.addEventListener("click",addSingleCoordinate);
+      coordinatePaste.addEventListener("keydown",function(event){
+        if(event.key==="Enter"){event.preventDefault();addSingleCoordinate();}
+      });
       resetBtn.addEventListener("click",reset);
       document.getElementById("copyBtn").addEventListener("click",copySelected);
       document.getElementById("shareBtn").addEventListener("click",shareSelected);
