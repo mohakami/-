@@ -162,8 +162,22 @@
     .map-head{min-height:50px;padding:2px 4px 11px;display:flex;align-items:center;justify-content:space-between}
     .map-stats{display:flex;gap:6px}
     .map-stats span{padding:5px 8px;color:var(--green);background:var(--green-soft);border-radius:8px;font-size:9.5px;font-weight:700}
-    .map-frame{position:relative;flex:1;min-height:0;overflow:hidden;background:#e9efec;border:1px solid #d7e1df;border-radius:14px}
-    #map{position:absolute;inset:0;z-index:1}
+    .map-style-switch{
+      display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:5px;margin:0 0 10px;
+      background:#f1f5f4;border:1px solid #dce6e3;border-radius:13px
+    }
+    .map-style-button{
+      min-width:0;min-height:42px;display:flex;align-items:center;justify-content:center;gap:7px;
+      padding:5px 8px;color:#5d6e75;background:transparent;border:1px solid transparent;
+      border-radius:10px;font-size:10.5px;font-weight:700;cursor:pointer
+    }
+    .map-style-button.active{color:var(--green);background:#fff;border-color:#c9ddd8;box-shadow:0 3px 10px rgba(23,42,54,.08)}
+    .map-style-icon{width:27px;height:27px;display:grid;place-items:center;flex:0 0 auto;border-radius:8px;font-size:16px}
+    .style-auto .map-style-icon{color:#217968;background:linear-gradient(145deg,#d9f3eb,#c8e9f3)}
+    .style-satellite .map-style-icon{color:#f2f5f4;background:linear-gradient(145deg,#344b49,#718079)}
+    .style-terrain .map-style-icon{color:#53634f;background:linear-gradient(145deg,#d8ddd0,#aeb9a5)}
+    .map-frame{position:relative;flex:1;min-height:0;overflow:hidden;direction:ltr;background:#e9efec;border:1px solid #d7e1df;border-radius:14px}
+    #map{position:absolute;inset:0;z-index:1;width:100%;height:100%;direction:ltr}
     .map-empty{
       position:absolute;z-index:500;top:50%;left:50%;width:min(280px,calc(100% - 36px));
       padding:18px;transform:translate(-50%,-50%);text-align:center;
@@ -249,7 +263,7 @@
       .workspace{display:flex;flex-direction:column;padding:8px}
       .input-panel,.details-panel,.map-panel{min-height:auto;border-radius:15px;scroll-margin-top:120px}
       .input-panel,.details-panel{padding:17px}
-      .input-panel{order:1}.map-panel{order:2;height:500px}.details-panel{order:3;min-height:430px}
+      .input-panel{order:1}.map-panel{order:2;height:555px}.details-panel{order:3;min-height:430px}
       textarea{min-height:150px;font-size:16px;line-height:1.7}
       .text-field,.coord-input,.hemisphere{min-height:44px;font-size:16px}
       .dms-block{padding:11px}.dms-grid{grid-template-columns:repeat(3,minmax(0,1fr)) 70px;gap:6px}
@@ -258,13 +272,16 @@
       .events-wrap{min-height:180px;max-height:340px}
       .event-row{min-height:62px}.event-copy strong{font-size:12px}.event-copy small{font-size:10px}
       .delete{opacity:1}.map-stats{display:none}
+      .map-style-button{min-height:46px;font-size:12px}
       .data-field{min-height:44px;font-size:13px}.coordinate{font-size:11px}
       .address p{font-size:11px}
       .toast{bottom:calc(18px + env(safe-area-inset-bottom));width:max-content;max-width:calc(100vw - 28px);text-align:center}
     }
     @media(max-width:420px){
       .brand{gap:8px}.brand h1{font-size:16px}.logo{width:38px;height:38px}
-      .map-panel{height:465px}.coordinates{grid-template-columns:1fr;gap:0}
+      .map-panel{height:525px}.coordinates{grid-template-columns:1fr;gap:0}
+      .map-style-button{gap:5px;padding-left:4px;padding-right:4px;font-size:11px}
+      .map-style-icon{width:25px;height:25px}
     }
   </style>
 </head>
@@ -350,6 +367,11 @@
           <div class="map-title"><span class="step">الخطوة 2</span><h2>مواقع الأحداث</h2></div>
           <div class="map-stats"><span id="resolvedStat">✓ 0 مكتمل</span><span id="errorStat" hidden>! 0 تعذر</span></div>
         </div>
+        <div class="map-style-switch" role="group" aria-label="نوع الخريطة">
+          <button class="map-style-button style-auto active" type="button" data-map-style="auto" aria-pressed="true"><span class="map-style-icon">▱</span><span>تلقائي</span></button>
+          <button class="map-style-button style-satellite" type="button" data-map-style="satellite" aria-pressed="false"><span class="map-style-icon">◫</span><span>القمر الصناعي</span></button>
+          <button class="map-style-button style-terrain" type="button" data-map-style="terrain" aria-pressed="false"><span class="map-style-icon">△</span><span>التضاريس</span></button>
+        </div>
         <div class="map-frame">
           <div id="map"></div>
           <div class="map-empty" id="mapEmpty"><div class="pin">⌖</div><strong>الخريطة جاهزة</strong><p>ألصق الأحداث واضغط تحديد المواقع لتظهر العلامات هنا.</p></div>
@@ -397,6 +419,8 @@
       var processing = false;
       var markers = {};
       var markerLayer;
+      var baseLayer;
+      var mapStyle = "auto";
       var fittedKey = "";
       var toastTimer;
 
@@ -415,16 +439,58 @@
       var coordinatePaste = document.getElementById("coordinatePaste");
       var singleTitle = document.getElementById("singleTitle");
       var coordinateControls = Array.prototype.slice.call(document.querySelectorAll(".coordinate-control"));
+      var mapFrame = document.querySelector(".map-frame");
 
       var map = L.map("map", { zoomControl:false }).setView([23.8859,45.0792],5);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom:19,
-        attribution:"&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a>"
-      }).addTo(map);
       L.control.zoom({position:"bottomleft"}).addTo(map);
       markerLayer = L.layerGroup().addTo(map);
-      setTimeout(function(){ map.invalidateSize(); },120);
-      window.addEventListener("resize",function(){ map.invalidateSize(); });
+
+      function createBaseLayer(style){
+        if(style==="satellite"){
+          return L.layerGroup([
+            L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Tiles &copy; Esri"}),
+            L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",{maxZoom:19})
+          ]);
+        }
+        if(style==="terrain"){
+          return L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Tiles &copy; Esri"});
+        }
+        return L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{
+          maxZoom:19,attribution:"&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a>"
+        });
+      }
+      function setMapStyle(style,silent){
+        if(["auto","satellite","terrain"].indexOf(style)===-1)style="auto";
+        if(baseLayer)map.removeLayer(baseLayer);
+        mapStyle=style;baseLayer=createBaseLayer(style).addTo(map);
+        document.querySelectorAll("[data-map-style]").forEach(function(button){
+          var active=button.getAttribute("data-map-style")===style;
+          button.classList.toggle("active",active);button.setAttribute("aria-pressed",String(active));
+        });
+        refreshMapSizeRepeatedly();save();
+        if(!silent)notice(style==="satellite"?"تم اختيار القمر الصناعي":style==="terrain"?"تم اختيار خريطة التضاريس":"تم اختيار الخريطة التلقائية");
+      }
+      setMapStyle("auto",true);
+
+      function refreshMapSize(){
+        requestAnimationFrame(function(){map.invalidateSize({pan:false,debounceMoveend:true});});
+      }
+      function refreshMapSizeRepeatedly(){
+        refreshMapSize();
+        [90,280,650].forEach(function(delay){setTimeout(refreshMapSize,delay);});
+      }
+      if(window.ResizeObserver){new ResizeObserver(refreshMapSize).observe(mapFrame);}
+      if(window.IntersectionObserver){
+        new IntersectionObserver(function(entries){
+          if(entries.some(function(entry){return entry.isIntersecting;}))refreshMapSizeRepeatedly();
+        }).observe(mapFrame);
+      }
+      if(document.fonts&&document.fonts.ready){document.fonts.ready.then(refreshMapSizeRepeatedly);}
+      map.whenReady(refreshMapSizeRepeatedly);
+      window.addEventListener("resize",refreshMapSizeRepeatedly);
+      window.addEventListener("orientationchange",refreshMapSizeRepeatedly);
+      window.addEventListener("pageshow",refreshMapSizeRepeatedly);
+      if(window.visualViewport){window.visualViewport.addEventListener("resize",refreshMapSizeRepeatedly);}
 
       function id(){
         return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : Date.now()+"-"+Math.random().toString(16).slice(2);
@@ -522,9 +588,18 @@
         };
       }
       async function getJson(url){
-        var response=await fetch(url,{headers:{"Accept":"application/json","Accept-Language":"ar"}});
-        if(!response.ok)throw new Error("تعذر الاتصال بخدمة تحديد المواقع");
-        return response.json();
+        var controller=window.AbortController?new AbortController():null;
+        var timeout=setTimeout(function(){if(controller)controller.abort();},9000);
+        try{
+          var options={headers:{"Accept":"application/json","Accept-Language":"ar"}};
+          if(controller)options.signal=controller.signal;
+          var response=await fetch(url,options);
+          if(!response.ok)throw new Error("تعذر الاتصال بخدمة تحديد المواقع");
+          return response.json();
+        }catch(error){
+          if(error&&error.name==="AbortError")throw new Error("انتهت مهلة جلب بيانات الدولة والمدينة");
+          throw error;
+        }finally{clearTimeout(timeout);}
       }
       async function reverse(lat,lng){
         var url="https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&accept-language=ar&lat="+encodeURIComponent(lat)+"&lon="+encodeURIComponent(lng);
@@ -547,7 +622,7 @@
         toastTimer=setTimeout(function(){document.getElementById("toast").classList.remove("show");},2700);
       }
       function save(){
-        try{localStorage.setItem(STORAGE_KEY,JSON.stringify({input:input.value,events:events}));}catch(e){}
+        try{localStorage.setItem(STORAGE_KEY,JSON.stringify({input:input.value,events:events,mapStyle:mapStyle}));}catch(e){}
       }
       function escapeHtml(value){
         return String(value).replace(/[&<>"']/g,function(ch){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[ch];});
@@ -603,6 +678,7 @@
         var key=ready.map(function(e){return e.id+":"+e.latitude+":"+e.longitude;}).join("|");
         if(ready.length&&key!==fittedKey){
           fittedKey=key;
+          map.invalidateSize({pan:false});
           var bounds=L.latLngBounds(ready.map(function(e){return [e.latitude,e.longitude];}));
           if(ready.length===1)map.setView(bounds.getCenter(),12);
           else map.fitBounds(bounds,{padding:[45,45],maxZoom:12});
@@ -623,7 +699,7 @@
       function selectEvent(eventId){
         selectedId=eventId;render();
         var event=events.find(function(e){return e.id===eventId;});
-        if(event)map.flyTo([event.latitude,event.longitude],Math.max(map.getZoom(),9),{duration:.65});
+        if(event){map.invalidateSize({pan:false});map.flyTo([event.latitude,event.longitude],Math.max(map.getZoom(),9),{duration:.65});}
       }
       function deleteEvent(eventId){
         events=events.filter(function(e){return e.id!==eventId;});
@@ -641,8 +717,10 @@
         var title=singleTitle.value.trim()||"موقع "+(events.length+1);
         var event={
           id:id(),title:title,source:title+" | "+format(coordinates.latitude)+", "+format(coordinates.longitude),
-          query:coordinates.latitude+", "+coordinates.longitude,status:"locating",
-          latitude:coordinates.latitude,longitude:coordinates.longitude
+          query:coordinates.latitude+", "+coordinates.longitude,status:"resolved",
+          latitude:coordinates.latitude,longitude:coordinates.longitude,
+          country:"جارٍ جلب الدولة…",city:"جارٍ جلب المدينة…",
+          address:format(coordinates.latitude)+", "+format(coordinates.longitude)
         };
         events.push(event);selectedId=event.id;fittedKey="";
         document.getElementById("progressText").textContent="0/1";
@@ -653,8 +731,10 @@
           clearSingleFields();
           notice("تمت إضافة الإحداثي إلى الخريطة");
         }catch(error){
-          event.status="error";event.error=error&&error.message?error.message:"تعذر تحديد الموقع";
-          notice(event.error);
+          event.status="resolved";event.country="غير متاحة";event.city="غير متاحة";
+          event.address="تم تحديد الإحداثي على الخريطة، وتعذّر جلب اسم الموقع.";
+          event.error=error&&error.message?error.message:"تعذر جلب بيانات الموقع";
+          notice("تم تحديد الموقع، وتعذّر جلب اسم الدولة والمدينة");
         }
         document.getElementById("progressText").textContent="1/1";
         setBusy(false);render();
@@ -670,14 +750,25 @@
         var selected=false;
         for(var i=0;i<events.length;i++){
           var current=events[i],line=parsed[i];
-          current.status="locating";document.getElementById("progressText").textContent=i+"/"+events.length;
+          if(line.coordinates){
+            current.status="resolved";current.country="جارٍ جلب الدولة…";current.city="جارٍ جلب المدينة…";
+            current.address=format(line.coordinates.latitude)+", "+format(line.coordinates.longitude);
+            if(!selected){selected=true;selectedId=current.id;}
+          }else{current.status="locating";}
+          document.getElementById("progressText").textContent=i+"/"+events.length;
           render();
           try{
             var result=line.coordinates?await reverse(line.coordinates.latitude,line.coordinates.longitude):await search(line.query);
             Object.assign(current,result,{status:"resolved",error:null});
             if(!selected){selected=true;selectedId=current.id;}
           }catch(error){
-            current.status="error";current.error=error&&error.message?error.message:"تعذر تحديد الموقع";
+            if(line.coordinates){
+              current.status="resolved";current.country="غير متاحة";current.city="غير متاحة";
+              current.address="تم تحديد الإحداثي على الخريطة، وتعذّر جلب اسم الموقع.";
+              current.error=error&&error.message?error.message:"تعذر جلب بيانات الموقع";
+            }else{
+              current.status="error";current.error=error&&error.message?error.message:"تعذر تحديد الموقع";
+            }
           }
           document.getElementById("progressText").textContent=(i+1)+"/"+events.length;
           render();
@@ -733,12 +824,19 @@
       document.getElementById("shareBtn").addEventListener("click",shareSelected);
       exportBtn.addEventListener("click",exportCsv);
       input.addEventListener("input",save);
+      document.querySelectorAll("[data-map-style]").forEach(function(button){
+        button.addEventListener("click",function(){setMapStyle(button.getAttribute("data-map-style"),false);});
+      });
       document.querySelectorAll(".mobile-nav a").forEach(function(link){
-        link.addEventListener("click",function(){setTimeout(function(){map.invalidateSize();},220);});
+        link.addEventListener("click",refreshMapSizeRepeatedly);
       });
       try{
         var stored=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");
-        if(stored){input.value=stored.input||"";events=stored.events||[];var first=events.find(function(e){return e.status==="resolved";});selectedId=first?first.id:null;}
+        if(stored){
+          input.value=stored.input||"";events=stored.events||[];
+          if(stored.mapStyle)setMapStyle(stored.mapStyle,true);
+          var first=events.find(function(e){return e.status==="resolved";});selectedId=first?first.id:null;
+        }
       }catch(e){try{localStorage.removeItem(STORAGE_KEY);}catch(ignore){}}
       render();
     })();
